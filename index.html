@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="Java 后端与 Agent 面试知识复习框架。" />
+    <title>八股复习站</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x2='1' y2='1'%3E%3Cstop stop-color='%23ffffff'/%3E%3Cstop offset='.55' stop-color='%23f7f7f7'/%3E%3Cstop offset='1' stop-color='%23ededed'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='60' height='60' rx='18' fill='url(%23g)'/%3E%3Crect x='3' y='3' width='58' height='58' rx='17' fill='none' stroke='white' stroke-opacity='.75' stroke-width='2'/%3E%3Cpath d='M18 22h28M18 32h22M18 42h28' stroke='%23333336' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="brand" aria-label="八股复习站">
+          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          <span class="brand-name">八股复习站</span>
+        </div>
+        <nav class="track-switch" role="tablist" aria-label="复习方向" data-active="backend">
+          <span class="track-lens" aria-hidden="true"></span>
+          <button id="tab-backend" class="track-tab" type="button" role="tab" aria-controls="workspace" data-track="backend">后端八股</button>
+          <button id="tab-agent" class="track-tab" type="button" role="tab" aria-controls="workspace" data-track="agent">Agent 八股</button>
+        </nav>
+        <div class="header-spacer" aria-hidden="true"></div>
+      </div>
+    </header>
+
+    <main id="workspace" class="workspace" role="tabpanel" aria-labelledby="tab-backend">
+      <section class="workspace-intro" aria-labelledby="page-title">
+        <div>
+          <span class="eyebrow">学习地图</span>
+          <h1 id="page-title">Java 后端八股</h1>
+          <p id="track-description">选择模块，整理你的复习方向。</p>
+        </div>
+        <div class="overview-count" aria-live="polite"><strong id="module-count">8</strong><span>个模块</span></div>
+      </section>
+
+      <div class="workspace-grid">
+        <aside class="module-sidebar" aria-labelledby="module-nav-title">
+          <div class="sidebar-heading"><span id="module-nav-title">知识模块</span><span id="sidebar-track-label">Java 后端</span></div>
+          <nav id="module-nav" aria-label="知识模块"></nav>
+        </aside>
+
+        <section class="main-panel" aria-labelledby="module-title">
+          <div class="breadcrumb"><span id="breadcrumb-track">后端八股</span><span class="breadcrumb-separator" aria-hidden="true">›</span><span id="breadcrumb-module"></span></div>
+          <div class="module-heading"><h2 id="module-title"></h2><span id="module-topic-count" class="topic-count">3 个方向</span></div>
+          <section class="topic-section" aria-labelledby="topic-section-title">
+            <h3 id="topic-section-title">复习方向</h3>
+            <div id="topic-grid" class="topic-grid" aria-label="细分方向"></div>
+          </section>
+          <section class="question-panel" aria-labelledby="question-heading">
+            <div class="question-panel-head"><h3 id="question-heading">题目</h3><span class="question-count">0 道题</span></div>
+            <div class="empty-state"><div class="empty-icon" aria-hidden="true"><span></span><span></span><span></span></div><strong id="empty-title">还没有题目</strong><p id="empty-description">选择一个复习方向，之后可在这里查看题目。</p></div>
+          </section>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
