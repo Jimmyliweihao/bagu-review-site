@@ -70,8 +70,10 @@ function render() {
   }
   document.querySelector('.track-switch').dataset.active = state.track;
   $('workspace').setAttribute('aria-labelledby', `tab-${state.track}`);
-  $('page-title').textContent = track.title;
-  $('module-count').textContent = String(total);
+  const pageTitle = $('page-title');
+  if (pageTitle) pageTitle.textContent = track.title;
+  const moduleCount = $('module-count');
+  if (moduleCount) moduleCount.textContent = String(total);
   $('sidebar-track-label').textContent = track.sidebarLabel;
   $('breadcrumb-track').textContent = track.breadcrumb;
   $('breadcrumb-module').textContent = module.name;
