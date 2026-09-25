@@ -189,8 +189,8 @@ body[data-atmosphere="daylight"] .backdrop-gradient {
   position: absolute;
   inset: -140px;
   overflow: hidden;
-  filter: blur(88px) saturate(155%);
-  opacity: 0.95;
+  filter: blur(100px) saturate(125%);
+  opacity: 0.65;
   transition: opacity 0.5s ease;
   will-change: transform;
   pointer-events: none;
@@ -216,8 +216,8 @@ body[data-atmosphere="obsidian"] .backdrop-mesh {
 }
 
 body[data-atmosphere="daylight"] .backdrop-mesh {
-  opacity: 0.22;
-  filter: blur(100px) saturate(110%);
+  opacity: 0.20;
+  filter: blur(110px) saturate(105%);
 }
 
 .spatial-orb {
@@ -227,7 +227,7 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   will-change: transform, border-radius, opacity;
 }
 
-/* Aurora orbs: Refined Nordic Spectrum (Glacier Teal, Celestial Indigo, Boreal Iris, Polar Corona Frost, Nordic Mint) */
+/* Aurora orbs: Refined Airy Nordic Spectrum (Subtle Glacier Teal, Celestial Indigo, Boreal Iris, Polar Frost, Nordic Mint) */
 .orb-cyan {
   top: -90px;
   right: -2%;
@@ -235,9 +235,9 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   height: 660px;
   background: radial-gradient(
     ellipse at center,
-    rgba(14, 165, 233, 0.72) 0%,
-    rgba(6, 182, 212, 0.42) 35%,
-    rgba(56, 189, 248, 0.15) 58%,
+    rgba(14, 165, 233, 0.46) 0%,
+    rgba(6, 182, 212, 0.24) 36%,
+    rgba(56, 189, 248, 0.07) 58%,
     transparent 72%
   );
   animation: morphAurora1 8s ease-in-out infinite alternate;
@@ -250,9 +250,9 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   height: 680px;
   background: radial-gradient(
     ellipse at center,
-    rgba(99, 102, 241, 0.68) 0%,
-    rgba(129, 140, 248, 0.38) 38%,
-    rgba(99, 102, 241, 0.12) 60%,
+    rgba(99, 102, 241, 0.42) 0%,
+    rgba(129, 140, 248, 0.22) 38%,
+    rgba(99, 102, 241, 0.06) 60%,
     transparent 72%
   );
   animation: morphAurora2 9.5s ease-in-out infinite alternate;
@@ -265,9 +265,9 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   height: 680px;
   background: radial-gradient(
     ellipse at center,
-    rgba(168, 85, 247, 0.62) 0%,
-    rgba(139, 92, 246, 0.34) 38%,
-    rgba(192, 132, 252, 0.1) 62%,
+    rgba(168, 85, 247, 0.38) 0%,
+    rgba(139, 92, 246, 0.20) 38%,
+    rgba(192, 132, 252, 0.05) 62%,
     transparent 74%
   );
   animation: morphAurora3 8.2s ease-in-out infinite alternate;
@@ -280,9 +280,9 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   height: 620px;
   background: radial-gradient(
     ellipse at center,
-    rgba(224, 242, 254, 0.82) 0%,
-    rgba(186, 230, 253, 0.48) 32%,
-    rgba(56, 189, 248, 0.2) 56%,
+    rgba(224, 242, 254, 0.58) 0%,
+    rgba(186, 230, 253, 0.28) 32%,
+    rgba(56, 189, 248, 0.10) 56%,
     transparent 72%
   );
   animation: morphAurora4 10s ease-in-out infinite alternate;
@@ -295,9 +295,9 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   height: 660px;
   background: radial-gradient(
     ellipse at center,
-    rgba(16, 185, 129, 0.66) 0%,
-    rgba(45, 212, 191, 0.38) 38%,
-    rgba(20, 184, 166, 0.12) 60%,
+    rgba(16, 185, 129, 0.40) 0%,
+    rgba(45, 212, 191, 0.22) 38%,
+    rgba(20, 184, 166, 0.06) 60%,
     transparent 72%
   );
   animation: morphAurora5 7.6s ease-in-out infinite alternate;
@@ -307,19 +307,19 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   0% {
     border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-    opacity: 0.88;
+    opacity: 0.72;
   }
   50% {
     border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
     transform: translate3d(-130px, 110px, 0) rotate(115deg) scale(1.24);
-    opacity: 1;
-    filter: brightness(1.12);
+    opacity: 0.90;
+    filter: brightness(1.08);
   }
   100% {
     border-radius: 50% 50% 30% 70% / 60% 40% 60% 40%;
     transform: translate3d(110px, -80px, 0) rotate(210deg) scale(0.92);
-    opacity: 0.84;
-    filter: brightness(0.96);
+    opacity: 0.68;
+    filter: brightness(0.98);
   }
 }
 
@@ -327,19 +327,19 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   0% {
     border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-    opacity: 0.86;
+    opacity: 0.70;
   }
   50% {
     border-radius: 30% 70% 70% 30% / 50% 60% 40% 50%;
     transform: translate3d(140px, -110px, 0) rotate(-120deg) scale(1.22);
-    opacity: 1;
-    filter: brightness(1.14);
+    opacity: 0.88;
+    filter: brightness(1.08);
   }
   100% {
     border-radius: 55% 45% 60% 40% / 40% 60% 40% 60%;
     transform: translate3d(-95px, 120px, 0) rotate(-220deg) scale(0.88);
-    opacity: 0.82;
-    filter: brightness(0.94);
+    opacity: 0.66;
+    filter: brightness(0.98);
   }
 }
 
@@ -347,19 +347,19 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   0% {
     border-radius: 50% 50% 40% 60% / 40% 60% 50% 50%;
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-    opacity: 0.85;
+    opacity: 0.70;
   }
   50% {
     border-radius: 70% 30% 60% 40% / 60% 40% 60% 40%;
     transform: translate3d(130px, -120px, 0) rotate(130deg) scale(1.24);
-    opacity: 1;
-    filter: brightness(1.15);
+    opacity: 0.88;
+    filter: brightness(1.08);
   }
   100% {
     border-radius: 40% 60% 50% 50% / 50% 50% 40% 60%;
     transform: translate3d(-85px, 95px, 0) rotate(230deg) scale(0.9);
-    opacity: 0.82;
-    filter: brightness(0.95);
+    opacity: 0.66;
+    filter: brightness(0.98);
   }
 }
 
@@ -367,19 +367,19 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   0% {
     border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%;
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
-    opacity: 0.88;
+    opacity: 0.72;
   }
   50% {
     border-radius: 60% 40% 40% 60% / 40% 60% 40% 60%;
     transform: translate3d(-110px, -100px, 0) rotate(-135deg) scale(1.26);
-    opacity: 1;
-    filter: brightness(1.18);
+    opacity: 0.90;
+    filter: brightness(1.10);
   }
   100% {
     border-radius: 50% 50% 70% 30% / 55% 45% 55% 45%;
     transform: translate3d(95px, 85px, 0) rotate(-250deg) scale(0.86);
-    opacity: 0.84;
-    filter: brightness(0.96);
+    opacity: 0.68;
+    filter: brightness(0.98);
   }
 }
 
@@ -387,18 +387,18 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
   0% {
     border-radius: 45% 55% 35% 65% / 55% 45% 65% 35%;
     transform: translate3d(0, 0, 0) rotate(0deg) scale(0.96);
-    opacity: 0.9;
+    opacity: 0.74;
   }
   50% {
     border-radius: 65% 35% 60% 40% / 40% 65% 35% 60%;
     transform: translate3d(110px, 85px, 0) rotate(120deg) scale(1.28);
-    opacity: 1;
-    filter: brightness(1.16);
+    opacity: 0.92;
+    filter: brightness(1.10);
   }
   100% {
     border-radius: 35% 65% 50% 50% / 60% 35% 65% 40%;
     transform: translate3d(-95px, -75px, 0) rotate(240deg) scale(1.06);
-    opacity: 0.86;
+    opacity: 0.70;
     filter: brightness(0.98);
   }
 }
