@@ -133,4 +133,126 @@ window.addEventListener('hashchange', () => {
   }
 });
 
+// ==========================================================================
+// Apple Liquid Glass Dynamic Specular Light Interaction
+// ==========================================================================
+function initLiquidSpecular() {
+  const attachSpecularTracker = (element) => {
+    let frameId = null;
+    element.addEventListener('pointermove', (event) => {
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(() => {
+        const rect = element.getBoundingClientRect();
+        element.style.setProperty('--specular-x', `${event.clientX - rect.left}px`);
+        element.style.setProperty('--specular-y', `${event.clientY - rect.top}px`);
+      });
+    });
+    element.addEventListener('pointerleave', () => {
+      if (frameId) cancelAnimationFrame(frameId);
+      element.style.removeProperty('--specular-x');
+      element.style.removeProperty('--specular-y');
+    });
+  };
+
+  const header = document.querySelector('.header-inner');
+  if (header) attachSpecularTracker(header);
+
+  // Topic card hover sheen using container delegation
+  const topicGrid = $('topic-grid');
+  if (topicGrid) {
+    let cardFrameId = null;
+    topicGrid.addEventListener('pointermove', (event) => {
+      const card = event.target.closest('.topic-card');
+      if (!card) return;
+      if (cardFrameId) cancelAnimationFrame(cardFrameId);
+      cardFrameId = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--card-mouse-x', `${event.clientX - rect.left}px`);
+        card.style.setProperty('--card-mouse-y', `${event.clientY - rect.top}px`);
+      });
+    });
+    topicGrid.addEventListener('pointerleave', (event) => {
+      if (cardFrameId) cancelAnimationFrame(cardFrameId);
+      const card = event.target.closest('.topic-card');
+      if (card) {
+        card.style.removeProperty('--card-mouse-x');
+        card.style.removeProperty('--card-mouse-y');
+      }
+    });
+  }
+}
+
+// ==========================================================================
+// Apple Liquid Glass Atmosphere Environment Mode Switcher & Dynamic Parallax
+// ==========================================================================
+function setAtmosphere(mode) {
+  document.body.dataset.atmosphere = mode;
+  document.querySelectorAll('.atmo-tab').forEach((tab) => {
+    tab.classList.toggle('active', tab.dataset.atmo === mode);
+  });
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute('content', mode === 'obsidian' ? '#000000' : '#ffffff');
+  }
+}
+
+function initAtmosphere() {
+  const saved = localStorage.getItem('bagu-atmosphere') || 'aurora';
+  setAtmosphere(saved);
+
+  document.querySelectorAll('.atmo-tab').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const mode = tab.dataset.atmo;
+      setAtmosphere(mode);
+      try {
+        localStorage.setItem('bagu-atmosphere', mode);
+      } catch (_) {}
+    });
+  });
+}
+
+function initAuroraParallax() {
+  const mesh = document.querySelector('.backdrop-mesh');
+  if (!mesh) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let targetX = 0, targetY = 0;
+  let currentX = 0, currentY = 0;
+  let rafId = null;
+
+  window.addEventListener('pointermove', (event) => {
+    if (document.body.dataset.atmosphere === 'obsidian') return;
+    const nx = (event.clientX / window.innerWidth - 0.5) * 2;
+    const ny = (event.clientY / window.innerHeight - 0.5) * 2;
+    targetX = nx * 40;
+    targetY = ny * 35;
+
+    if (!rafId) {
+      rafId = requestAnimationFrame(animateMesh);
+    }
+  }, { passive: true });
+
+  function animateMesh() {
+    if (document.body.dataset.atmosphere === 'obsidian') {
+      mesh.style.transform = '';
+      rafId = null;
+      return;
+    }
+
+    currentX += (targetX - currentX) * 0.055;
+    currentY += (targetY - currentY) * 0.055;
+    mesh.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0)`;
+
+    if (Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05) {
+      rafId = requestAnimationFrame(animateMesh);
+    } else {
+      rafId = null;
+    }
+  }
+}
+
 render();
+initLiquidSpecular();
+initAtmosphere();
+initAuroraParallax();
