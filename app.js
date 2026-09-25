@@ -74,7 +74,8 @@ function render() {
   if (pageTitle) pageTitle.textContent = track.title;
   const moduleCount = $('module-count');
   if (moduleCount) moduleCount.textContent = String(total);
-  $('sidebar-track-label').textContent = track.sidebarLabel;
+  const sidebarTrackLabel = $('sidebar-track-label');
+  if (sidebarTrackLabel) sidebarTrackLabel.textContent = track.sidebarLabel;
   $('breadcrumb-track').textContent = track.breadcrumb;
   $('breadcrumb-module').textContent = module.name;
   $('module-title').textContent = module.name;

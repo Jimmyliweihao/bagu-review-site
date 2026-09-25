@@ -407,23 +407,25 @@ body[data-atmosphere="daylight"] .backdrop-mesh {
    2. Floating Island Header (Liquid Glass Capsule Toolbar)
    ========================================================================== */
 .site-header {
-  padding: 18px 24px 0;
+  padding: 18px 0 0;
   position: sticky;
   top: 0;
   z-index: 100;
+  display: flex;
+  justify-content: center;
 }
 
 .header-inner {
-  max-width: 1380px;
+  width: min(1380px, calc(100% - 48px));
   min-height: 64px;
-  margin: auto;
+  margin: 0 auto;
   padding: 0 24px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 20px;
   
-  border-radius: 999px;
+  border-radius: 22px;
   background: var(--glass-fill);
   border: var(--glass-border-hairline);
   box-shadow: var(--shadow-floating-capsule);
@@ -674,9 +676,9 @@ body[data-atmosphere="obsidian"] .atmo-tab.active {
    4. Workspace Chassis & Layout
    ========================================================================== */
 .workspace {
-  max-width: 1380px;
-  margin: auto;
-  padding: 24px 24px 64px;
+  width: min(1380px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 24px 0 64px;
 }
 
 .workspace-intro {
@@ -748,62 +750,80 @@ body[data-atmosphere="obsidian"] .overview-count {
 }
 
 /* ==========================================================================
-   5. Window Chassis (visionOS / macOS Tahoe Window Material)
+   5. Floating Multi-Island Workspace (visionOS / macOS Tahoe Spatial Layout)
    ========================================================================== */
 .workspace-grid {
   display: grid;
-  grid-template-columns: 270px minmax(0, 1fr);
-  align-items: stretch;
-  min-height: 700px;
-  border-radius: 28px;
-  background: var(--glass-fill);
-  border: var(--glass-border-hairline);
-  box-shadow: var(--shadow-window-chassis);
-  -webkit-backdrop-filter: var(--glass-blur-heavy);
-  backdrop-filter: var(--glass-blur-heavy);
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: start;
+  gap: 32px;
   position: relative;
-  overflow: hidden;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: visible;
 }
 
-/* Optical curved light catch on window header edge */
-.workspace-grid::before {
+/* ==========================================================================
+   6. Floating Island Sidebar (Sticky Floating Capsule Panel)
+   ========================================================================== */
+.module-sidebar {
+  position: sticky;
+  top: 96px;
+  z-index: 10;
+  align-self: start;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: 22px;
+  background: var(--glass-fill);
+  border: var(--glass-border-hairline);
+  box-shadow: var(--shadow-floating-capsule);
+  -webkit-backdrop-filter: var(--glass-blur-nav);
+  backdrop-filter: var(--glass-blur-nav);
+  padding: 8px 8px 14px;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+/* Custom minimal scrollbar for sticky floating sidebar */
+.module-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+.module-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+body[data-atmosphere="obsidian"] .module-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Optical curved specular highlight on floating sidebar */
+.module-sidebar::before {
   content: '';
   position: absolute;
   inset: 0 0 auto 0;
-  height: 40%;
+  height: 38%;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.68) 0%, rgba(255, 255, 255, 0.06) 50%, transparent 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.05) 60%, transparent 100%);
   z-index: 1;
 }
 
-body[data-atmosphere="obsidian"] .workspace-grid::before {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 50%, transparent 100%);
-}
-
-
-/* ==========================================================================
-   6. Sidebar (macOS / iPadOS SplitView Specification)
-   ========================================================================== */
-.module-sidebar {
-  position: relative;
-  z-index: 2;
-  border-right: 1px solid var(--separator-color);
-  background: rgba(255, 255, 255, 0.18);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-body[data-atmosphere="obsidian"] .module-sidebar {
-  background: rgba(255, 255, 255, 0.03);
+body[data-atmosphere="obsidian"] .module-sidebar::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 60%, transparent 100%);
 }
 
 .sidebar-heading {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  padding: 22px 18px 12px;
+  padding: 10px 12px 10px;
+  line-height: 1;
 }
 
 .sidebar-heading span:first-child {
@@ -822,24 +842,26 @@ body[data-atmosphere="obsidian"] .module-sidebar {
 }
 
 .module-sidebar nav {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 3px;
-  padding: 0 10px 16px;
+  padding: 0 4px 2px;
 }
 
 /* Apple Sidebar List Row */
 .module-link {
   width: 100%;
-  min-height: 38px;
+  min-height: 40px;
   display: flex;
   align-items: center;
-  padding: 8px 12px;
+  padding: 8px 14px;
   border: 1px solid transparent;
-  border-radius: 9px;
+  border-radius: 11px;
   background: transparent;
   color: var(--label-secondary);
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 500;
   text-align: left;
   cursor: pointer;
@@ -847,7 +869,7 @@ body[data-atmosphere="obsidian"] .module-sidebar {
 }
 
 .module-link:hover {
-  background: rgba(0, 0, 0, 0.04);
+  background: rgba(0, 0, 0, 0.045);
   color: var(--label-primary);
 }
 
@@ -875,13 +897,27 @@ body[data-atmosphere="obsidian"] .module-link:hover {
 }
 
 /* ==========================================================================
-   7. Main Panel & Grouped Table Cards (Apple HIG Grouped Layout)
+   7. Main Panel (Clean Open Canvas - Non-modularized)
    ========================================================================== */
 .main-panel {
   position: relative;
   z-index: 2;
-  min-height: 700px;
-  padding: 38px 48px 48px;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  overflow: visible;
+}
+
+.main-panel::before {
+  display: none;
+}
+
+body[data-atmosphere="obsidian"] .main-panel::before {
+  display: none;
 }
 
 .breadcrumb {
@@ -891,6 +927,8 @@ body[data-atmosphere="obsidian"] .module-link:hover {
   color: var(--label-tertiary);
   font-size: 13px;
   font-weight: 500;
+  line-height: 1;
+  padding-top: 10px;
 }
 
 .breadcrumb span:last-child {
@@ -1213,16 +1251,22 @@ body[data-atmosphere="obsidian"] .empty-icon {
 @media (max-width: 1100px) {
   .workspace-grid {
     grid-template-columns: 240px minmax(0, 1fr);
+    gap: 16px;
   }
   .main-panel {
-    padding: 34px 36px 42px;
+    padding: 32px 36px 42px;
   }
 }
 
 @media (max-width: 900px) {
   .workspace-grid {
-    grid-template-columns: 210px minmax(0, 1fr);
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 14px;
     min-height: 0;
+  }
+  .module-sidebar {
+    top: 84px;
+    max-height: calc(100vh - 100px);
   }
   .main-panel {
     padding: 28px 24px 36px;
@@ -1258,29 +1302,19 @@ body[data-atmosphere="obsidian"] .empty-icon {
   
   .workspace-grid {
     display: block;
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-  .workspace-grid::before {
-    display: none;
+    gap: 0;
   }
 
-  .module-sidebar, .main-panel {
-    border: var(--glass-border-hairline);
-    border-radius: 22px;
-    background: var(--glass-fill);
-    box-shadow: var(--shadow-window-chassis);
-    -webkit-backdrop-filter: var(--glass-blur-heavy);
-    backdrop-filter: var(--glass-blur-heavy);
-  }
   .module-sidebar {
-    margin-bottom: 14px;
-    overflow: hidden;
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    margin-bottom: 16px;
+    border-radius: 22px;
+  }
+  .main-panel {
+    border-radius: 22px;
   }
   .sidebar-heading {
     padding: 16px 16px 8px;
