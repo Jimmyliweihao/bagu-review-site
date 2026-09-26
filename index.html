@@ -23,13 +23,16 @@
         <div class="spatial-orb orb-emerald"></div>
       </div>
       <div class="backdrop-noise"></div>
+      <div class="backdrop-mist" id="backdrop-mist" aria-hidden="true"></div>
     </div>
     <header class="site-header">
       <div class="header-inner">
-        <button id="brand-toggle" class="brand" type="button" aria-expanded="true" aria-label="收起顶部导航" title="收起顶部导航">
-          <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <div class="brand-group">
+          <button id="brand-toggle" class="brand-mark-btn" type="button" aria-expanded="true" aria-label="收起顶部导航" title="收起顶部导航 (沉浸模式)">
+            <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+          </button>
           <span class="brand-name">八股复习站</span>
-        </button>
+        </div>
         <nav class="track-switch" role="tablist" aria-label="复习方向" data-active="backend">
           <span class="track-lens" aria-hidden="true"></span>
           <button id="tab-backend" class="track-tab" type="button" role="tab" aria-controls="workspace" data-track="backend">后端八股</button>
@@ -38,9 +41,18 @@
         <div class="header-actions">
           <div class="atmosphere-switch" role="group" aria-label="玻璃氛围模式" data-active="aurora">
             <span class="atmo-lens" aria-hidden="true"></span>
-            <button type="button" class="atmo-tab active" data-atmo="aurora" title="极光流体">极光</button>
-            <button type="button" class="atmo-tab" data-atmo="daylight" title="晨曦天光">晨曦</button>
-            <button type="button" class="atmo-tab" data-atmo="obsidian" title="暗夜琉璃">暗夜</button>
+            <button type="button" class="atmo-tab active" data-atmo="aurora" title="极光流体">
+              <svg class="atmo-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+              <span>极光</span>
+            </button>
+            <button type="button" class="atmo-tab" data-atmo="daylight" title="晨曦天光">
+              <svg class="atmo-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <span>晨曦</span>
+            </button>
+            <button type="button" class="atmo-tab" data-atmo="obsidian" title="暗夜琉璃">
+              <svg class="atmo-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+              <span>暗夜</span>
+            </button>
           </div>
         </div>
       </div>

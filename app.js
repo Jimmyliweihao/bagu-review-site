@@ -178,9 +178,6 @@ function initLiquidSpecular() {
   const header = document.querySelector('.header-inner');
   if (header) attachSpecularTracker(header);
 
-  const sidebar = document.querySelector('.module-sidebar');
-  if (sidebar) attachSpecularTracker(sidebar);
-
   // Topic card hover sheen using container delegation
   const topicGrid = $('topic-grid');
   if (topicGrid) {
@@ -233,6 +230,72 @@ function setAtmosphere(mode) {
   }
 }
 
+let currentMistAnim = null;
+
+function triggerAmbientMistDiffusion(x, y, targetMode) {
+  const mist = $('backdrop-mist');
+  if (!mist) return;
+
+  if (currentMistAnim) {
+    try {
+      currentMistAnim.cancel();
+    } catch (_) {}
+    currentMistAnim = null;
+  }
+
+  // Calculate maximum distance to the 4 viewport corners to guarantee full coverage
+  const maxDist = Math.hypot(
+    Math.max(x, window.innerWidth - x),
+    Math.max(y, window.innerHeight - y)
+  );
+
+  // The base mist element has a radius of 120px (240px diameter).
+  // Target scale covers maxDist with a 35% margin to ensure the soft Gaussian falloff envelops corners.
+  const targetScale = Math.max(20, Math.ceil((maxDist * 1.35) / 120));
+
+  mist.className = `backdrop-mist mist-${targetMode}`;
+  mist.style.left = `${x.toFixed(1)}px`;
+  mist.style.top = `${y.toFixed(1)}px`;
+
+  currentMistAnim = mist.animate([
+    {
+      transform: 'translate3d(-50%, -50%, 0) scale(0.1)',
+      opacity: 0
+    },
+    {
+      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 0.25)})`,
+      opacity: 0.85,
+      offset: 0.22
+    },
+    {
+      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 0.65)})`,
+      opacity: 0.60,
+      offset: 0.55
+    },
+    {
+      transform: `translate3d(-50%, -50%, 0) scale(${targetScale})`,
+      opacity: 0.20,
+      offset: 0.85
+    },
+    {
+      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 1.15)})`,
+      opacity: 0,
+      offset: 1.0
+    }
+  ], {
+    duration: 1750,
+    easing: 'cubic-bezier(0.12, 1, 0.28, 1)',
+    fill: 'forwards'
+  });
+
+  currentMistAnim.onfinish = () => {
+    mist.style.opacity = '0';
+    mist.style.transform = 'translate3d(-9999px, -9999px, 0) scale(0.1)';
+    mist.className = 'backdrop-mist';
+    currentMistAnim = null;
+  };
+}
+
 function initAtmosphere() {
   const urlAtmo = urlParams.get('atmo');
   const saved = urlAtmo || localStorage.getItem('bagu-atmosphere') || 'aurora';
@@ -247,55 +310,36 @@ function initAtmosphere() {
   });
 
   document.querySelectorAll('.atmo-tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
+    tab.addEventListener('click', (event) => {
       const mode = tab.dataset.atmo;
+      if (document.body.dataset.atmosphere === mode) return;
+
+      const rect = tab.getBoundingClientRect();
+      const x = (event.clientX && event.clientX > 0) ? event.clientX : (rect.left + rect.width / 2);
+      const y = (event.clientY && event.clientY > 0) ? event.clientY : (rect.top + rect.height / 2);
+
+      // Tactile button micro-spring feedback via Web Animations API (zero layout reflow)
+      try {
+        tab.animate([
+          { transform: 'scale(1)' },
+          { transform: 'scale(1.08)', offset: 0.35 },
+          { transform: 'scale(1)' }
+        ], {
+          duration: 480,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
+        });
+      } catch (_) {}
+
+      // Permeate organic ambient mist radially outward from (x, y) across the screen
+      triggerAmbientMistDiffusion(x, y, mode);
+
+      // Synchronous seamless transition in perfect 0.95s phase alignment (zero stutter)
       setAtmosphere(mode);
       try {
         localStorage.setItem('bagu-atmosphere', mode);
       } catch (_) {}
     });
   });
-}
-
-function initAuroraParallax() {
-  const mesh = document.querySelector('.backdrop-mesh');
-  if (!mesh) return;
-
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  let targetX = 0, targetY = 0;
-  let currentX = 0, currentY = 0;
-  let rafId = null;
-
-  window.addEventListener('pointermove', (event) => {
-    if (document.body.dataset.atmosphere === 'obsidian') return;
-    const nx = (event.clientX / window.innerWidth - 0.5) * 2;
-    const ny = (event.clientY / window.innerHeight - 0.5) * 2;
-    targetX = nx * 40;
-    targetY = ny * 35;
-
-    if (!rafId) {
-      rafId = requestAnimationFrame(animateMesh);
-    }
-  }, { passive: true });
-
-  function animateMesh() {
-    if (document.body.dataset.atmosphere === 'obsidian') {
-      mesh.style.transform = '';
-      rafId = null;
-      return;
-    }
-
-    currentX += (targetX - currentX) * 0.055;
-    currentY += (targetY - currentY) * 0.055;
-    mesh.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0)`;
-
-    if (Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05) {
-      rafId = requestAnimationFrame(animateMesh);
-    } else {
-      rafId = null;
-    }
-  }
 }
 
 function initHeaderCollapse() {
@@ -324,6 +368,15 @@ function initHeaderCollapse() {
     const isCurrentlyCollapsed = document.body.classList.contains('header-collapsed');
     setHeaderCollapsed(!isCurrentlyCollapsed);
   });
+
+  const brandName = document.querySelector('.brand-name');
+  if (brandName) {
+    brandName.addEventListener('click', () => {
+      if (document.body.classList.contains('header-collapsed')) {
+        setHeaderCollapsed(false);
+      }
+    });
+  }
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -337,9 +390,6 @@ function initModuleNavHoverTracker() {
   if (!nav) return;
   nav.classList.add('has-lens');
 
-  let activeIndex = null;
-  let isInside = false;
-
   function getLens() {
     let lens = nav.querySelector('.module-nav-lens');
     if (!lens) {
@@ -351,83 +401,120 @@ function initModuleNavHoverTracker() {
     return lens;
   }
 
-  function moveLensTo(button, animate = true) {
-    const lens = getLens();
-    const allButtons = nav.querySelectorAll('.module-link');
-    allButtons.forEach(b => b.classList.remove('is-hovered'));
+  let activeIndex = -1;
+  let isInside = false;
+  let moveFrameId = null;
+  let cachedMetrics = [];
+  let navRect = null;
 
-    if (!button) {
-      lens.style.transition = 'opacity 0.18s ease-out, transform 0.18s var(--apple-spring)';
-      lens.style.transform = lens.style.transform.replace(/scale\([^)]+\)/, 'scale(0.96)');
-      lens.style.opacity = '0';
-      return;
-    }
-    button.classList.add('is-hovered');
-
-    const navRect = nav.getBoundingClientRect();
-    const btnRect = button.getBoundingClientRect();
-    const top = btnRect.top - navRect.top;
-    const height = btnRect.height;
-    const isActive = button.classList.contains('active');
-
-    lens.classList.toggle('is-active-item', isActive);
-
-    // Fast, buoyant Apple spring tracking: 130ms snappy spring with slight 3D elevation
-    lens.style.transition = animate
-      ? 'transform 0.13s cubic-bezier(0.16, 1, 0.3, 1), height 0.13s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.12s ease-out, background 0.12s ease-out, border-color 0.12s ease-out, box-shadow 0.14s ease-out'
-      : 'opacity 0.12s ease-out, transform 0.18s var(--apple-spring)';
-    lens.style.transform = `translateY(${top - 1.5}px) scale(1.015)`;
-    lens.style.height = `${height}px`;
-    lens.style.opacity = '1';
+  function updateNavRect() {
+    navRect = nav.getBoundingClientRect();
   }
 
-  let specularFrameId = null;
+  function updateMetrics() {
+    const buttons = Array.from(nav.querySelectorAll('.module-link'));
+    cachedMetrics = buttons.map((btn, index) => {
+      const top = btn.offsetTop;
+      const height = btn.offsetHeight;
+      return {
+        btn,
+        index,
+        top,
+        height,
+        centerY: top + height / 2,
+      };
+    });
+  }
+
+  // Nearest Centroid Projection: Mathematical Voronoi 1D proximity mapping
+  function getNearestTarget(cursorY) {
+    if (!cachedMetrics.length) return null;
+    let closest = cachedMetrics[0];
+    let minDistance = Math.abs(cursorY - closest.centerY);
+    for (let i = 1; i < cachedMetrics.length; i++) {
+      const distance = Math.abs(cursorY - cachedMetrics[i].centerY);
+      if (distance < minDistance) {
+        minDistance = distance;
+        closest = cachedMetrics[i];
+      }
+    }
+    return closest;
+  }
+
+  nav.addEventListener('pointerenter', () => {
+    updateMetrics();
+    updateNavRect();
+    isInside = true;
+  }, { passive: true });
+
+  window.addEventListener('resize', () => {
+    updateMetrics();
+    updateNavRect();
+  }, { passive: true });
+
+  window.addEventListener('scroll', () => {
+    updateNavRect();
+  }, { passive: true });
 
   nav.addEventListener('pointermove', (event) => {
-    const buttons = Array.from(nav.querySelectorAll('.module-link'));
-    if (!buttons.length) return;
+    // If elements refreshed by render() or metrics empty, refresh cache
+    if (!cachedMetrics.length || cachedMetrics[0].btn.parentElement !== nav) {
+      updateMetrics();
+      updateNavRect();
+    }
+    if (!cachedMetrics.length) return;
+    if (!navRect) updateNavRect();
 
-    let targetBtn = event.target.closest('.module-link');
-    let targetIndex = buttons.indexOf(targetBtn);
+    const cursorY = event.clientY - navRect.top;
+    const target = getNearestTarget(cursorY);
+    if (!target) return;
 
-    if (targetIndex === -1) {
-      const navRect = nav.getBoundingClientRect();
-      targetIndex = event.clientY < (navRect.top + navRect.height / 2) ? 0 : buttons.length - 1;
+    const lens = getLens();
+    const isNewItem = target.index !== activeIndex;
+
+    // Apple Micro-Parallax: ±2.2px liquid magnetic follower based on distance from item center
+    const deltaY = cursorY - target.centerY;
+    const microOffset = Math.max(-2.2, Math.min(2.2, deltaY * 0.09));
+    const targetY = target.top + microOffset;
+
+    if (isNewItem) {
+      activeIndex = target.index;
+      cachedMetrics.forEach(m => m.btn.classList.toggle('is-hovered', m.index === activeIndex));
+      lens.classList.remove('is-micro-tracking');
+      lens.style.transition = 'transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), height 0.12s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.14s ease-out';
     }
 
-    if (targetIndex !== -1) {
-      const btn = buttons[targetIndex];
-      if (targetIndex !== activeIndex) {
-        activeIndex = targetIndex;
-        moveLensTo(btn, isInside);
-        isInside = true;
+    if (moveFrameId) cancelAnimationFrame(moveFrameId);
+    moveFrameId = requestAnimationFrame(() => {
+      if (!isNewItem && !lens.classList.contains('is-micro-tracking')) {
+        lens.classList.add('is-micro-tracking');
+        lens.style.transition = 'transform 0.04s ease-out, height 0.12s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.14s ease-out';
       }
 
-      // Real-time specular spotlight tracking under the pointer
-      const lens = getLens();
-      const btnRect = btn.getBoundingClientRect();
-      const mouseX = event.clientX - btnRect.left;
-      const mouseY = event.clientY - btnRect.top;
+      lens.style.transform = `translate3d(0, ${targetY.toFixed(1)}px, 0) scale(1.01)`;
+      lens.style.height = `${target.height}px`;
+      lens.style.opacity = '1';
 
-      if (specularFrameId) cancelAnimationFrame(specularFrameId);
-      specularFrameId = requestAnimationFrame(() => {
-        lens.style.setProperty('--lens-mouse-x', `${mouseX}px`);
-        lens.style.setProperty('--lens-mouse-y', `${mouseY}px`);
-      });
-    }
+      // Zero-reflow specular spotlight: pure algebraic projection (eliminating forced layout reflow)
+      const mouseX = event.clientX - navRect.left;
+      const mouseY = cursorY - targetY;
+      lens.style.setProperty('--lens-mouse-x', `${mouseX.toFixed(1)}px`);
+      lens.style.setProperty('--lens-mouse-y', `${mouseY.toFixed(1)}px`);
+    });
   }, { passive: true });
 
   nav.addEventListener('pointerleave', () => {
-    if (specularFrameId) cancelAnimationFrame(specularFrameId);
+    if (moveFrameId) cancelAnimationFrame(moveFrameId);
     isInside = false;
-    activeIndex = null;
-    const allButtons = nav.querySelectorAll('.module-link');
-    allButtons.forEach(b => b.classList.remove('is-hovered'));
+    activeIndex = -1;
+    navRect = null;
+    cachedMetrics.forEach(m => m.btn.classList.remove('is-hovered'));
+
     const lens = getLens();
-    lens.classList.remove('is-active-item');
-    lens.style.transition = 'opacity 0.18s ease-out, transform 0.18s var(--apple-spring)';
-    const currentY = lens.style.transform.match(/translateY\([^)]+\)/)?.[0] || 'translateY(0px)';
-    lens.style.transform = `${currentY} scale(0.96)`;
+    lens.classList.remove('is-micro-tracking');
+    lens.style.transition = 'opacity 0.18s ease-out, transform 0.20s var(--apple-spring)';
+    const currentTranslate = lens.style.transform.match(/translate3d\([^)]+\)/)?.[0] || 'translate3d(0, 0px, 0)';
+    lens.style.transform = `${currentTranslate} scale(0.96)`;
     lens.style.opacity = '0';
   }, { passive: true });
 }
@@ -435,7 +522,6 @@ function initModuleNavHoverTracker() {
 render();
 initLiquidSpecular();
 initAtmosphere();
-initAuroraParallax();
 initHeaderCollapse();
 initModuleNavHoverTracker();
 
@@ -446,10 +532,9 @@ if (urlParams.get('hover-demo') === 'true') {
       const lens = document.querySelector('.module-nav-lens');
       const nav = $('module-nav');
       if (lens && nav) {
-        const navRect = nav.getBoundingClientRect();
         const btnRect = links[1].getBoundingClientRect();
-        lens.style.transform = `translateY(${btnRect.top - navRect.top - 1.5}px) scale(1.015)`;
-        lens.style.height = `${btnRect.height}px`;
+        lens.style.transform = `translateY(${links[1].offsetTop}px) scale(1.01)`;
+        lens.style.height = `${links[1].offsetHeight}px`;
         lens.style.setProperty('--lens-mouse-x', `${btnRect.width * 0.45}px`);
         lens.style.setProperty('--lens-mouse-y', `${btnRect.height * 0.5}px`);
         lens.style.opacity = '1';
@@ -460,3 +545,4 @@ if (urlParams.get('hover-demo') === 'true') {
     if (cards[1]) cards[1].classList.add('pseudo-hover');
   }, 100);
 }
+

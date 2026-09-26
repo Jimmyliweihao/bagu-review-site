@@ -30,13 +30,13 @@
 - 暗夜模式 (`body[data-atmosphere="obsidian"]`) 下统一转为 `border: 1px solid rgba(255, 255, 255, 0.14~0.16)`。
 
 ### 3. 毛玻璃与折射率规则 (Backdrop Filter Rule)
-- 交互卡片（`.topic-card`）与悬浮透镜（`.module-nav-lens`）必须采用高透水感毛玻璃：
+- 交互卡片（`.topic-card`）与弹窗必须采用高透水感毛玻璃（维持 `180%` 饱和度折射）：
   ```css
   background: rgba(255, 255, 255, 0.48 ~ 0.52);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
   ```
-- 饱和度增幅必须维持在 `180%`，以还原穿透极光光球时的鲜活折射质感。
+- 悬浮高速物理透镜（`.module-nav-lens`）采用 Apple Native Pro 视网膜双微晶水感层（`background: rgba(255, 255, 255, 0.65); backdrop-filter: none;`），彻底卸载高速移动时的实时重采样卷积负担，实现物理级 120Hz 零延迟响应并保障字迹印刷级锐利。
 
 ### 4. Apple R 角阶梯与同心圆角法则 (Concentric Radius Formula)
 - 任何组件必须严格使用标准阶梯 Token，禁止硬编码孤立数值：
@@ -52,6 +52,9 @@
 
 ### 5. 交互跟手与性能规则 (Interaction & 60 FPS Rule)
 - 纵向/横向导航条目交互，必须采用**单个物理透镜（Single Lens）的磁吸连续滑动**（通过 `requestAnimationFrame` 驱动 `transform: translateY(...)`），严禁给每个 item 各自绑定延迟 hover 动效；
+- **几何最近邻投影吸附（Nearest Centroid Projection）**：必须基于垂直中心点欧氏距离计算最近目标项，严禁粗暴二分或缺省直接瞬移到首尾项；
+- **排版绝对静止准则（Typographic Stillness Rule）**：目录悬浮时严禁文本出现横向 `translateX` 抖动或字重拉扯，视线基准线必须绝对稳固，交互反馈纯粹由水感透镜与字色微光承担；
+- **项内微磁吸浮动（Micro-Parallax Follower）**：透镜在当前项内部叠加 $\pm 2\text{px}$ 弹性随动，聚光灯反光严格锚定透镜即时视口包围盒；
 - 动效曲线必须使用 Apple 标准阻尼 `var(--apple-spring)` (`cubic-bezier(0.16, 1, 0.3, 1)`)；
 - 指针聚光灯反光坐标计算必须挂载在容器代理上，并使用 `requestAnimationFrame` 防抖节流。
 
@@ -71,10 +74,12 @@
 - 分段控制器（`.track-switch`, `.atmosphere-switch`）物理滑块严禁使用 $\ge 90\%$ 不透明度的实心乳白塑料块；
 - 必须维持 `rgba(255, 255, 255, 0.72 ~ 0.78)` 水感半透基底 + `blur(16px) saturate(180%)` + 顶端 1px 晶体高光切边（`inset 0 1px 0.5px #fff`），暗夜模式同步转为 `rgba(255, 255, 255, 0.16)` 深熏黑琉璃。
 
-### 10. 电影级环境光融解与零瞬断规则 (Cinematic Ambient Cross-Fade Rule)
-- 模式切换（极光 $\leftrightarrow$ 晨曦 $\leftrightarrow$ 暗夜）严禁视觉硬切、频闪与眩晕；
-- **禁止滤镜补间与光斑猝死**：严禁在暗夜模式对 `.backdrop-mesh` 设置 `display: none !important`，严禁动态补间 `filter: blur(...)`（防止 GPU 重绘阶跃导致闪烁），光球必须维持固定滤镜并通过纯硬件级 `opacity` 在 `0.85s cubic-bezier(0.4, 0, 0.2, 1)` 内平滑淡隐；
-- **零下陷双向底色混合**：背景底色渐变必须拆分为独立图层由 GPU `opacity 0.85s` 进行混合交叠，底座背景色必须随氛围同步过渡，杜绝中间帧透底露黑导致的“亮度下陷抽搐（Luminance Dip）”；
-- **视网膜同构阴影对齐**：浅色与暗色模式的 `box-shadow` 投影层数必须严格一对一对齐，杜绝因层数不匹配引发的阴影突跳；
-- **全局 0.85s 缓入缓出调光**：全站卡片、外框、边框与文字严禁使用前段暴冲的 Spring 曲线，统一配置 **0.85s + `cubic-bezier(0.4, 0, 0.2, 1)`** 影院级平滑 S 曲线，给瞳孔充分适应时间。
+### 10. 电影级环境水墨弥漫与零瞬断规则 (Cinematic Ambient Mist Permeation Rule)
+- 模式切换（极光 $\leftrightarrow$ 晨曦 $\leftrightarrow$ 暗夜）严禁视觉硬切、频闪、眩晕、边界硬边与任何急促感；
+- **点光源全局水墨弥漫体系 (Organic Mist Diffusion Engine)**：模式切换严禁任何可识别的几何边框或实心色盘；以所点击按钮的物理坐标 $(x, y)$ 为真实点光源，向四周展开纯正圆柔和水雾光幕（`.backdrop-mist`，核心叠加 `filter: blur(80px)` 与低对比度半透光谱），以 **1.75s `cubic-bezier(0.12, 1, 0.28, 1)`** 超长柔和阻尼曲线徐徐向外漫散充盈全屏，与底层 1.75s 影院级曲线无缝交叠，带来“天光从按钮舒缓漫入、薄雾轻抚全屏”的沉浸沐浴感；
+- **零强制回流（Zero Forced Reflow）**：严禁在点击处理中执行 `void element.offsetWidth` 等触发同步样式重排的操作；微动效统一采用硬件级 Web Animations API (`element.animate`) 驱动，实现 100% 满帧硬件合成；
+- **真实色谱对齐与零颜色突变**：光雾材质严格维持低饱和半透明雾气（峰值浓度 $\le 65\%$），中心向外呈二次方连续衰减，极光使用北欧纯净天光浅调（`rgba(240, 246, 255)` / `rgba(224, 242, 254)`），晨曦使用日光白雾，暗夜使用深熏夜幕水墨，严禁注入高饱和度伪色；
+- **禁止滤镜补间与光斑猝死**：严禁在暗夜模式对 `.backdrop-mesh` 设置 `display: none !important`，光球维持硬件级 `opacity` 平滑淡隐；
+- **零下陷双向底色混合**：背景底色渐变拆分为独立图层由 GPU `opacity 1.75s` 混合交叠，底座背景色随氛围同步过渡，杜绝中间帧透底露黑导致的“亮度下陷抽搐（Luminance Dip）”；
+- **视网膜同构阴影对齐**：浅色与暗色模式的 `box-shadow` 投影层数严格一对一对齐，杜绝因层数不匹配引发的阴影突跳。
 

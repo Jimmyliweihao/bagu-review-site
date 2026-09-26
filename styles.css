@@ -31,7 +31,7 @@
 
   --glass-blur-heavy: blur(28px) saturate(190%);
   --glass-blur-nav: blur(20px) saturate(180%);
-  --glass-blur-subtle: blur(20px) saturate(180%);
+  --glass-blur-subtle: blur(14px) saturate(180%);
 
   /* Apple Liquid Ambient Occlusion, Specular Rim & Grounding Shadows */
   --shadow-floating-capsule:
@@ -57,10 +57,10 @@
   --apple-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --apple-press: cubic-bezier(0.2, 0.8, 0.2, 1);
 
-  /* Apple Cinematic Ambient Dissolve Physics (Gentle Non-Jarring S-Curve) */
-  --ambient-fade-timing: cubic-bezier(0.4, 0, 0.2, 1);
-  --ambient-fade-duration: 0.85s;
-  --ambient-text-duration: 0.65s;
+  /* Apple Cinematic Ambient Dissolve Physics (Tranquil Ambient Deceleration Curve) */
+  --ambient-fade-timing: cubic-bezier(0.12, 1, 0.28, 1);
+  --ambient-fade-duration: 1.75s;
+  --ambient-text-duration: 1.75s;
   
   /* Layout Sizing */
   --sidebar-width: 260px;
@@ -145,7 +145,10 @@ body[data-atmosphere="obsidian"] {
 }
 
 body[data-atmosphere="daylight"] {
-  background-color: #f5f5f7;
+  --glass-fill: rgba(255, 255, 255, 0.72);
+  --glass-fill-subtle: rgba(255, 255, 255, 0.55);
+  --glass-fill-elevated: rgba(255, 255, 255, 0.90);
+  background-color: #ffffff;
 }
 
 body[data-atmosphere="aurora"] {
@@ -200,7 +203,7 @@ body[data-atmosphere="obsidian"] .apple-spatial-backdrop {
 }
 
 body[data-atmosphere="daylight"] .apple-spatial-backdrop {
-  background-color: #f5f5f7;
+  background-color: #ffffff;
 }
 
 body[data-atmosphere="aurora"] .apple-spatial-backdrop {
@@ -224,11 +227,11 @@ body[data-atmosphere="aurora"] .apple-spatial-backdrop {
     linear-gradient(180deg, #f7faff 0%, #ebf2fa 100%);
 }
 
-/* Daylight Mode Gradient */
+/* Daylight Mode Gradient: Pristine Pure White Studio Canvas */
 .backdrop-daylight {
   background:
-    radial-gradient(130% 90% at 50% -15%, #ffffff 0%, rgba(245, 245, 247, 0.8) 55%, #e6eaf2 100%),
-    linear-gradient(180deg, #f5f5f7 0%, #edf0f7 100%);
+    radial-gradient(130% 90% at 50% -10%, #ffffff 0%, #fafbfc 65%, #f5f6f9 100%),
+    linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
 }
 
 /* Obsidian Mode Gradient */
@@ -252,48 +255,48 @@ body[data-atmosphere="obsidian"] .backdrop-obsidian {
   opacity: 1;
 }
 
-/* High-end Ethereal Aurora Mesh - Atmospheric Nordic light diffusion */
+/* High-end Ethereal Aurora Mesh - Atmospheric Nordic light diffusion (GPU Compositor Direct) */
 .backdrop-mesh {
   position: absolute;
   inset: -140px;
   overflow: hidden;
-  filter: blur(100px) saturate(125%);
+  filter: blur(20px) saturate(125%);
   opacity: 0.65;
   transition: opacity var(--ambient-fade-duration) var(--ambient-fade-timing);
   will-change: opacity;
+  transform: translate3d(0, 0, 0);
+  contain: strict;
+  isolation: isolate;
   pointer-events: none;
 }
 
-body[data-atmosphere="daylight"] .backdrop-mesh {
-  opacity: 0.20;
-}
-
+body[data-atmosphere="daylight"] .backdrop-mesh,
 body[data-atmosphere="obsidian"] .backdrop-mesh {
   opacity: 0;
-  /* Smooth zero-flicker 850ms fade into OLED black */
+  pointer-events: none;
+  /* Pure static studio canvas with zero GPU blur orbs */
 }
 
 /* Ultra-fine Film Grain to prevent color banding and add tactile glass depth */
 .backdrop-noise {
   position: absolute;
   inset: 0;
-  opacity: 0.024;
+  opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   pointer-events: none;
-  mix-blend-mode: overlay;
   z-index: 1;
   transition: opacity var(--ambient-fade-duration) var(--ambient-fade-timing);
 }
 
 body[data-atmosphere="obsidian"] .backdrop-noise {
-  opacity: 0.012;
+  opacity: 0.015;
 }
 
 .spatial-orb {
   position: absolute;
-  border-radius: 50%;
   pointer-events: none;
-  will-change: transform, border-radius, opacity;
+  will-change: transform, opacity;
+  transform: translate3d(0, 0, 0);
 }
 
 /* Aurora orbs: Refined Airy Nordic Spectrum (Subtle Glacier Teal, Celestial Indigo, Boreal Iris, Polar Frost, Nordic Mint) */
@@ -302,12 +305,14 @@ body[data-atmosphere="obsidian"] .backdrop-noise {
   right: -2%;
   width: 780px;
   height: 660px;
+  border-radius: 46% 54% 68% 32% / 48% 46% 54% 52%;
   background: radial-gradient(
     ellipse at center,
-    rgba(14, 165, 233, 0.46) 0%,
-    rgba(6, 182, 212, 0.24) 36%,
-    rgba(56, 189, 248, 0.07) 58%,
-    transparent 72%
+    rgba(14, 165, 233, 0.44) 0%,
+    rgba(6, 182, 212, 0.25) 30%,
+    rgba(56, 189, 248, 0.10) 54%,
+    rgba(56, 189, 248, 0.02) 74%,
+    transparent 90%
   );
   animation: morphAurora1 8s ease-in-out infinite alternate;
 }
@@ -317,12 +322,14 @@ body[data-atmosphere="obsidian"] .backdrop-noise {
   left: -2%;
   width: 760px;
   height: 680px;
+  border-radius: 58% 42% 34% 66% / 58% 34% 66% 42%;
   background: radial-gradient(
     ellipse at center,
-    rgba(99, 102, 241, 0.42) 0%,
-    rgba(129, 140, 248, 0.22) 38%,
-    rgba(99, 102, 241, 0.06) 60%,
-    transparent 72%
+    rgba(99, 102, 241, 0.40) 0%,
+    rgba(129, 140, 248, 0.22) 32%,
+    rgba(99, 102, 241, 0.08) 56%,
+    rgba(99, 102, 241, 0.02) 76%,
+    transparent 90%
   );
   animation: morphAurora2 9.5s ease-in-out infinite alternate;
 }
@@ -332,12 +339,14 @@ body[data-atmosphere="obsidian"] .backdrop-noise {
   left: 2%;
   width: 800px;
   height: 680px;
+  border-radius: 48% 52% 44% 56% / 44% 58% 42% 56%;
   background: radial-gradient(
     ellipse at center,
-    rgba(168, 85, 247, 0.38) 0%,
-    rgba(139, 92, 246, 0.20) 38%,
-    rgba(192, 132, 252, 0.05) 62%,
-    transparent 74%
+    rgba(168, 85, 247, 0.36) 0%,
+    rgba(139, 92, 246, 0.20) 32%,
+    rgba(192, 132, 252, 0.08) 56%,
+    rgba(192, 132, 252, 0.02) 76%,
+    transparent 90%
   );
   animation: morphAurora3 8.2s ease-in-out infinite alternate;
 }
@@ -347,12 +356,14 @@ body[data-atmosphere="obsidian"] .backdrop-noise {
   right: 0%;
   width: 720px;
   height: 620px;
+  border-radius: 44% 56% 56% 44% / 56% 44% 56% 44%;
   background: radial-gradient(
     ellipse at center,
-    rgba(224, 242, 254, 0.58) 0%,
-    rgba(186, 230, 253, 0.28) 32%,
-    rgba(56, 189, 248, 0.10) 56%,
-    transparent 72%
+    rgba(224, 242, 254, 0.55) 0%,
+    rgba(186, 230, 253, 0.26) 30%,
+    rgba(56, 189, 248, 0.10) 54%,
+    rgba(56, 189, 248, 0.02) 76%,
+    transparent 90%
   );
   animation: morphAurora4 10s ease-in-out infinite alternate;
 }
@@ -362,113 +373,90 @@ body[data-atmosphere="obsidian"] .backdrop-noise {
   left: 22%;
   width: 780px;
   height: 660px;
+  border-radius: 52% 48% 44% 56% / 48% 54% 46% 52%;
   background: radial-gradient(
     ellipse at center,
-    rgba(16, 185, 129, 0.40) 0%,
-    rgba(45, 212, 191, 0.22) 38%,
-    rgba(20, 184, 166, 0.06) 60%,
-    transparent 72%
+    rgba(16, 185, 129, 0.38) 0%,
+    rgba(45, 212, 191, 0.20) 32%,
+    rgba(20, 184, 166, 0.08) 56%,
+    rgba(20, 184, 166, 0.02) 76%,
+    transparent 90%
   );
   animation: morphAurora5 7.6s ease-in-out infinite alternate;
 }
 
 @keyframes morphAurora1 {
   0% {
-    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1);
     opacity: 0.72;
   }
   50% {
-    border-radius: 70% 30% 50% 50% / 30% 60% 40% 70%;
-    transform: translate3d(-130px, 110px, 0) rotate(115deg) scale(1.24);
+    transform: translate3d(-130px, 110px, 0) rotate(115deg) scale(1.24, 0.88);
     opacity: 0.90;
-    filter: brightness(1.08);
   }
   100% {
-    border-radius: 50% 50% 30% 70% / 60% 40% 60% 40%;
-    transform: translate3d(110px, -80px, 0) rotate(210deg) scale(0.92);
+    transform: translate3d(110px, -80px, 0) rotate(210deg) scale(0.92, 1.15);
     opacity: 0.68;
-    filter: brightness(0.98);
   }
 }
 
 @keyframes morphAurora2 {
   0% {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1);
     opacity: 0.70;
   }
   50% {
-    border-radius: 30% 70% 70% 30% / 50% 60% 40% 50%;
-    transform: translate3d(140px, -110px, 0) rotate(-120deg) scale(1.22);
+    transform: translate3d(140px, -110px, 0) rotate(-120deg) scale(1.22, 0.86);
     opacity: 0.88;
-    filter: brightness(1.08);
   }
   100% {
-    border-radius: 55% 45% 60% 40% / 40% 60% 40% 60%;
-    transform: translate3d(-95px, 120px, 0) rotate(-220deg) scale(0.88);
+    transform: translate3d(-95px, 120px, 0) rotate(-220deg) scale(0.88, 1.18);
     opacity: 0.66;
-    filter: brightness(0.98);
   }
 }
 
 @keyframes morphAurora3 {
   0% {
-    border-radius: 50% 50% 40% 60% / 40% 60% 50% 50%;
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1);
     opacity: 0.70;
   }
   50% {
-    border-radius: 70% 30% 60% 40% / 60% 40% 60% 40%;
-    transform: translate3d(130px, -120px, 0) rotate(130deg) scale(1.24);
+    transform: translate3d(130px, -120px, 0) rotate(130deg) scale(1.24, 0.84);
     opacity: 0.88;
-    filter: brightness(1.08);
   }
   100% {
-    border-radius: 40% 60% 50% 50% / 50% 50% 40% 60%;
-    transform: translate3d(-85px, 95px, 0) rotate(230deg) scale(0.9);
+    transform: translate3d(-85px, 95px, 0) rotate(230deg) scale(0.90, 1.16);
     opacity: 0.66;
-    filter: brightness(0.98);
   }
 }
 
 @keyframes morphAurora4 {
   0% {
-    border-radius: 40% 60% 60% 40% / 60% 40% 60% 40%;
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1);
     opacity: 0.72;
   }
   50% {
-    border-radius: 60% 40% 40% 60% / 40% 60% 40% 60%;
-    transform: translate3d(-110px, -100px, 0) rotate(-135deg) scale(1.26);
+    transform: translate3d(-110px, -100px, 0) rotate(-135deg) scale(1.26, 0.85);
     opacity: 0.90;
-    filter: brightness(1.10);
   }
   100% {
-    border-radius: 50% 50% 70% 30% / 55% 45% 55% 45%;
-    transform: translate3d(95px, 85px, 0) rotate(-250deg) scale(0.86);
+    transform: translate3d(95px, 85px, 0) rotate(-250deg) scale(0.86, 1.20);
     opacity: 0.68;
-    filter: brightness(0.98);
   }
 }
 
 @keyframes morphAurora5 {
   0% {
-    border-radius: 45% 55% 35% 65% / 55% 45% 65% 35%;
-    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.96);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(0.96, 1.04);
     opacity: 0.74;
   }
   50% {
-    border-radius: 65% 35% 60% 40% / 40% 65% 35% 60%;
-    transform: translate3d(110px, 85px, 0) rotate(120deg) scale(1.28);
+    transform: translate3d(110px, 85px, 0) rotate(120deg) scale(1.28, 0.82);
     opacity: 0.92;
-    filter: brightness(1.10);
   }
   100% {
-    border-radius: 35% 65% 50% 50% / 60% 35% 65% 40%;
-    transform: translate3d(-95px, -75px, 0) rotate(240deg) scale(1.06);
+    transform: translate3d(-95px, -75px, 0) rotate(240deg) scale(1.06, 0.94);
     opacity: 0.70;
-    filter: brightness(0.98);
   }
 }
 
@@ -489,7 +477,7 @@ body[data-atmosphere="obsidian"] .backdrop-noise {
 
 .header-inner {
   width: 100%;
-  min-height: 64px;
+  min-height: 60px;
   padding: 0 16px;
   display: flex;
   align-items: center;
@@ -566,40 +554,45 @@ body[data-atmosphere="obsidian"] .header-inner::after {
   opacity: 1;
 }
 
-/* Brand */
-.brand {
+/* Brand Group & Decoupled Toggle */
+.brand-group {
   position: relative;
   z-index: 2;
-  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  text-decoration: none;
-  color: var(--label-primary);
-  white-space: nowrap;
-  user-select: none;
+  flex-shrink: 0;
+}
+
+.brand-mark-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: 0;
   padding: 0;
   margin: 0;
   cursor: pointer;
-  font: inherit;
-  transition: opacity 0.2s ease, transform 0.2s var(--apple-spring);
+  border-radius: var(--radius-badge);
+  transition: transform 0.2s var(--apple-spring);
 }
 
-.brand:hover,
-.brand:focus-visible {
-  background: transparent;
-  outline: none;
+.brand-mark-btn:focus-visible {
+  outline: 2px solid var(--system-accent);
+  outline-offset: 2px;
 }
 
-body[data-atmosphere="obsidian"] .brand:hover,
-body[data-atmosphere="obsidian"] .brand:focus-visible {
-  background: transparent;
+.brand-mark-btn:hover .brand-mark {
+  transform: scale(1.05);
+  background: rgba(0, 0, 0, 0.06);
 }
 
-.brand:active {
-  transform: scale(0.97);
+body[data-atmosphere="obsidian"] .brand-mark-btn:hover .brand-mark {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.brand-mark-btn:active .brand-mark {
+  transform: scale(0.95);
 }
 
 .brand-name {
@@ -607,6 +600,8 @@ body[data-atmosphere="obsidian"] .brand:focus-visible {
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--label-primary);
+  user-select: none;
+  white-space: nowrap;
   transition: color var(--ambient-text-duration) ease;
 }
 
@@ -630,21 +625,10 @@ body[data-atmosphere="obsidian"] .brand:focus-visible {
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
 }
 
-.brand:hover .brand-mark,
-.brand:focus-visible .brand-mark {
-  transform: scale(1.04);
-  background: rgba(0, 0, 0, 0.06);
-}
-
 body[data-atmosphere="obsidian"] .brand-mark {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-body[data-atmosphere="obsidian"] .brand:hover .brand-mark,
-body[data-atmosphere="obsidian"] .brand:focus-visible .brand-mark {
-  background: rgba(255, 255, 255, 0.14);
 }
 
 .brand-mark span {
@@ -663,7 +647,7 @@ body.header-collapsed .brand-mark span:nth-child(2) {
 }
 
 /* ==========================================================================
-   3. Apple Native Segmented Control (HIG Standard Capsule)
+   3. Apple Native Segmented Control (HIG Standard 36px Capsule)
    ========================================================================== */
 .track-switch {
   position: absolute;
@@ -672,7 +656,8 @@ body.header-collapsed .brand-mark span:nth-child(2) {
   z-index: 2;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  width: 300px;
+  width: 280px;
+  height: 36px;
   padding: 3px;
   border-radius: var(--radius-pill);
   background: rgba(120, 120, 128, 0.08);
@@ -704,6 +689,7 @@ body.header-collapsed .track-switch {
   bottom: 3px;
   left: 3px;
   width: calc(50% - 3px);
+  height: calc(100% - 6px);
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.76);
   border: 0.5px solid rgba(60, 60, 67, 0.08);
@@ -719,6 +705,8 @@ body.header-collapsed .track-switch {
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .track-switch[data-active=agent] .track-lens {
@@ -746,21 +734,26 @@ body[data-atmosphere="obsidian"] .track-lens {
 .track-tab {
   position: relative;
   z-index: 2;
-  min-height: 34px;
-  padding: 6px 12px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--label-secondary);
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 550;
   letter-spacing: -0.01em;
   cursor: pointer;
-  transition: color var(--ambient-text-duration) ease, transform 0.15s var(--apple-press);
+  transition: color var(--ambient-text-duration) ease, background 0.18s ease, transform 0.15s var(--apple-press);
 }
 
-.track-tab:hover {
+.track-tab:not([aria-selected=true]):hover {
   color: var(--label-primary);
+  background: rgba(255, 255, 255, 0.38);
 }
 
 .track-tab:active {
@@ -776,8 +769,9 @@ body[data-atmosphere="obsidian"] .track-tab {
   color: rgba(255, 255, 255, 0.65);
 }
 
-body[data-atmosphere="obsidian"] .track-tab:hover {
+body[data-atmosphere="obsidian"] .track-tab:not([aria-selected=true]):hover {
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 body[data-atmosphere="obsidian"] .track-tab[aria-selected=true] {
@@ -813,6 +807,7 @@ body.header-collapsed .header-actions {
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  height: 36px;
   padding: 3px;
   border-radius: var(--radius-pill);
   background: rgba(120, 120, 128, 0.08);
@@ -830,6 +825,7 @@ body.header-collapsed .header-actions {
   bottom: 3px;
   left: 3px;
   width: calc((100% - 6px) / 3);
+  height: calc(100% - 6px);
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.76);
   border: 0.5px solid rgba(60, 60, 67, 0.08);
@@ -880,23 +876,29 @@ body[data-atmosphere="obsidian"] .atmo-lens {
 .atmo-tab {
   position: relative;
   z-index: 2;
-  min-height: 28px;
-  padding: 5px 10px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0 10px;
   border-radius: var(--radius-pill);
   border: 0;
   background: transparent;
   color: var(--label-secondary);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 550;
   letter-spacing: -0.01em;
   cursor: pointer;
-  transition: color var(--ambient-text-duration) ease, transform 0.15s var(--apple-press);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: color var(--ambient-text-duration) ease, background 0.18s ease, transform 0.15s var(--apple-press);
   text-align: center;
   white-space: nowrap;
 }
 
-.atmo-tab:hover {
+.atmo-tab:not(.active):hover {
   color: var(--label-primary);
+  background: rgba(255, 255, 255, 0.38);
 }
 
 .atmo-tab:active {
@@ -914,13 +916,54 @@ body[data-atmosphere="obsidian"] .atmo-tab {
   color: rgba(255, 255, 255, 0.65);
 }
 
-body[data-atmosphere="obsidian"] .atmo-tab:hover {
+body[data-atmosphere="obsidian"] .atmo-tab:not(.active):hover {
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 body[data-atmosphere="obsidian"] .atmo-tab.active {
   background: transparent;
   color: #ffffff;
+}
+
+/* Atmosphere Micro-Glyph SVG Styling */
+.atmo-icon {
+  flex-shrink: 0;
+  opacity: 0.72;
+  transition: opacity 0.2s ease, transform 0.2s var(--apple-spring);
+}
+
+.atmo-tab.active .atmo-icon {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.atmo-tab:hover .atmo-icon {
+  opacity: 0.95;
+}
+
+/* Subtle Hairline Dividers between unselected tabs */
+.atmo-tab:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 25%;
+  height: 50%;
+  width: 1px;
+  background: rgba(60, 60, 67, 0.12);
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+body[data-atmosphere="obsidian"] .atmo-tab:not(:last-child)::after {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.atmosphere-switch[data-active="aurora"] .atmo-tab:nth-child(1)::after,
+.atmosphere-switch[data-active="daylight"] .atmo-tab:nth-child(1)::after,
+.atmosphere-switch[data-active="daylight"] .atmo-tab:nth-child(2)::after,
+.atmosphere-switch[data-active="obsidian"] .atmo-tab:nth-child(2)::after {
+  opacity: 0;
 }
 
 /* ==========================================================================
@@ -1138,20 +1181,23 @@ body[data-atmosphere="obsidian"] .module-sidebar::-webkit-scrollbar-thumb {
   pointer-events: none;
   z-index: 1;
   opacity: 0;
-  /* Crystal Translucent Glass: matches topic-card hover material */
-  background: rgba(255, 255, 255, 0.48);
-  border: 1px solid rgba(255, 255, 255, 0.88);
+  /* Apple Native macOS Pro Specular Microcrystal (Zero-Latency Direct Compositing) */
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(60, 60, 67, 0.13);
   box-shadow:
     0 10px 24px -4px rgba(20, 25, 45, 0.08),
-    inset 0 1px 0 #ffffff;
-  -webkit-backdrop-filter: var(--glass-blur-subtle);
-  backdrop-filter: var(--glass-blur-subtle);
+    0 2px 6px -1px rgba(20, 25, 45, 0.03),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.98),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   overflow: hidden;
+  contain: layout paint;
   will-change: transform, opacity, height;
   transform-origin: center center;
   transition: 
-    transform 0.13s cubic-bezier(0.16, 1, 0.3, 1),
-    height 0.13s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.12s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.12s cubic-bezier(0.16, 1, 0.3, 1),
     opacity 0.14s ease-out,
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
@@ -1167,50 +1213,44 @@ body[data-atmosphere="obsidian"] .module-sidebar::-webkit-scrollbar-thumb {
   pointer-events: none;
   opacity: 1;
   background: radial-gradient(
-    200px circle at var(--lens-mouse-x, 50%) var(--lens-mouse-y, 50%),
-    rgba(255, 255, 255, 0.28) 0%,
-    rgba(255, 255, 255, 0.06) 45%,
+    220px circle at var(--lens-mouse-x, 50%) var(--lens-mouse-y, 50%),
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.08) 45%,
     transparent 70%
   );
   z-index: 1;
 }
 
 body[data-atmosphere="obsidian"] .module-nav-lens {
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  -webkit-backdrop-filter: var(--glass-blur-subtle);
-  backdrop-filter: var(--glass-blur-subtle);
+    0 2px 6px rgba(0, 0, 0, 0.35),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.30),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+body[data-atmosphere="daylight"] .module-nav-lens {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(60, 60, 67, 0.13);
+  box-shadow:
+    0 10px 24px -4px rgba(20, 25, 45, 0.08),
+    0 2px 6px -1px rgba(20, 25, 45, 0.03),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.98),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 body[data-atmosphere="obsidian"] .module-nav-lens::after {
   background: radial-gradient(
-    200px circle at var(--lens-mouse-x, 50%) var(--lens-mouse-y, 50%),
-    rgba(255, 255, 255, 0.15) 0%,
+    220px circle at var(--lens-mouse-x, 50%) var(--lens-mouse-y, 50%),
+    rgba(255, 255, 255, 0.16) 0%,
     transparent 70%
   );
-}
-
-/* Elevated Blue Glow when hovering over active item */
-.module-nav-lens.is-active-item {
-  background: rgba(0, 113, 227, 0.16);
-  border-color: rgba(0, 113, 227, 0.45);
-  box-shadow:
-    0 10px 26px -2px rgba(0, 113, 227, 0.22),
-    0 2px 8px rgba(0, 113, 227, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  -webkit-backdrop-filter: var(--glass-blur-subtle);
-  backdrop-filter: var(--glass-blur-subtle);
-}
-
-body[data-atmosphere="obsidian"] .module-nav-lens.is-active-item {
-  background: rgba(41, 151, 255, 0.24);
-  border-color: rgba(41, 151, 255, 0.55);
-  box-shadow:
-    0 10px 28px rgba(41, 151, 255, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* When continuous lens is active on the container */
@@ -1227,26 +1267,17 @@ body[data-atmosphere="obsidian"] .module-nav-lens.is-active-item {
   box-shadow: none;
 }
 
-/* Active item in list */
+/* Active item in list: Decoupled elegant state indication */
 .module-sidebar nav.has-lens .module-link.active {
   background: var(--system-accent-subtle);
   color: var(--system-accent);
-  border: 1px solid rgba(0, 113, 227, 0.32);
+  border: 1px solid rgba(0, 113, 227, 0.30);
   box-shadow:
     0 4px 14px -2px rgba(0, 113, 227, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
   -webkit-backdrop-filter: var(--glass-blur-subtle);
   backdrop-filter: var(--glass-blur-subtle);
   z-index: 2;
-}
-
-/* When the lens is directly over the active item, the lens provides the elevated glow */
-.module-sidebar nav.has-lens .module-link.active.is-hovered {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }
 
 /* Apple Floating Sidebar Item */
@@ -1257,7 +1288,7 @@ body[data-atmosphere="obsidian"] .module-nav-lens.is-active-item {
   min-height: 40px;
   display: flex;
   align-items: center;
-  padding: 8px 14px;
+  padding: 8px 14px 8px 16px;
   border: 1px solid transparent;
   border-radius: var(--radius-item);
   background: transparent;
@@ -1266,7 +1297,28 @@ body[data-atmosphere="obsidian"] .module-nav-lens.is-active-item {
   font-weight: 500;
   text-align: left;
   cursor: pointer;
-  transition: color 0.35s ease, background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: color 0.20s ease, background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+/* Left crystal accent indicator pill for active module */
+.module-link.active::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3.5px;
+  height: 16px;
+  border-radius: var(--radius-pill);
+  background: var(--system-accent);
+  box-shadow: 0 0 8px rgba(0, 113, 227, 0.55);
+  pointer-events: none;
+  transition: transform 0.2s var(--apple-spring), opacity 0.2s ease;
+}
+
+body[data-atmosphere="obsidian"] .module-link.active::after {
+  background: #52a9ff;
+  box-shadow: 0 0 10px rgba(82, 169, 255, 0.65);
 }
 
 /* Seamless hit area extending 2px up and down */
@@ -1286,17 +1338,16 @@ body[data-atmosphere="obsidian"] .module-nav-lens.is-active-item {
   text-overflow: ellipsis;
   white-space: nowrap;
   display: inline-block;
-  transition: transform 0.18s var(--apple-spring), color 0.35s ease;
-  will-change: transform, color;
+  transition: color 0.18s ease;
+  will-change: color;
 }
 
-/* Tactile Spring Bounce & Elevation on Item Hover */
+/* Typographic Stillness on Hover (Zero Horizontal Jitter) */
 .module-link:hover .module-link-name,
 .module-link.is-hovered .module-link-name,
 .module-link.pseudo-hover .module-link-name {
   color: var(--label-primary);
-  transform: translateX(3px);
-  font-weight: 550;
+  transform: none;
 }
 
 body[data-atmosphere="obsidian"] .module-link:hover .module-link-name,
@@ -1326,14 +1377,6 @@ body[data-atmosphere="obsidian"] .module-link.active {
   box-shadow: 0 2px 10px rgba(41, 151, 255, 0.2);
   -webkit-backdrop-filter: var(--glass-blur-subtle);
   backdrop-filter: var(--glass-blur-subtle);
-}
-
-body[data-atmosphere="obsidian"] .module-sidebar nav.has-lens .module-link.active.is-hovered {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
 }
 
 /* ==========================================================================
@@ -1792,6 +1835,9 @@ body[data-atmosphere="obsidian"] .empty-icon {
     grid-template-columns: 1fr;
     gap: 12px;
   }
+  .track-switch {
+    width: 250px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1821,8 +1867,11 @@ body[data-atmosphere="obsidian"] .empty-icon {
     padding: 14px 18px;
     border-radius: var(--radius-island);
   }
-  .brand, .track-switch, .header-actions {
+  .brand-group, .track-switch, .header-actions {
     width: 100%;
+  }
+  .brand-group {
+    justify-content: space-between;
   }
   .header-actions {
     justify-content: center;
@@ -1927,3 +1976,61 @@ body[data-atmosphere="obsidian"] .empty-icon {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   11. Ambient Mist Permeation Engine (Atmospheric Gaussian Cloud - Zero Boundary)
+   ========================================================================== */
+.backdrop-mist {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-9999px, -9999px, 0) scale(0.1);
+  will-change: transform, opacity;
+  z-index: 2; /* Positioned directly behind glass cards, illuminating the spatial field */
+  filter: blur(80px); /* Optical crystal Gaussian dispersion: completely melts any perceptible edge */
+}
+
+/* 1. Daylight: Pristine Sunlit Morning Sky - 100% Pure White Luminous Mist */
+.backdrop-mist.mist-daylight {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 255, 255, 0.65) 25%,
+    rgba(255, 255, 255, 0.35) 55%,
+    rgba(255, 255, 255, 0.10) 80%,
+    transparent 100%
+  );
+}
+
+/* 2. Aurora: Serene Ethereal Nordic Light - Soft Ethereal Vapor */
+.backdrop-mist.mist-aurora {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(240, 246, 255, 0.62) 0%,
+    rgba(224, 242, 254, 0.42) 25%,
+    rgba(230, 238, 255, 0.22) 55%,
+    rgba(240, 248, 255, 0.07) 80%,
+    transparent 100%
+  );
+}
+
+/* 3. Obsidian: Deep Velvet Midnight Void - Soft Ethereal Vapor */
+.backdrop-mist.mist-obsidian {
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(7, 8, 12, 0.52) 25%,
+    rgba(14, 15, 20, 0.28) 55%,
+    rgba(20, 22, 30, 0.08) 80%,
+    transparent 100%
+  );
+}
+
+
+
+
