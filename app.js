@@ -83,6 +83,11 @@ function render() {
 
   const nav = $('module-nav');
   nav.replaceChildren();
+  const lens = document.createElement('span');
+  lens.className = 'module-nav-lens';
+  lens.setAttribute('aria-hidden', 'true');
+  nav.append(lens);
+
   track.modules.forEach((item, index) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -142,46 +147,71 @@ window.addEventListener('hashchange', () => {
 function initLiquidSpecular() {
   const attachSpecularTracker = (element) => {
     let frameId = null;
+    let rect = null;
+
+    const updateRect = () => {
+      rect = element.getBoundingClientRect();
+    };
+
+    element.addEventListener('pointerenter', updateRect, { passive: true });
+    window.addEventListener('resize', updateRect, { passive: true });
+    window.addEventListener('scroll', updateRect, { passive: true });
+
     element.addEventListener('pointermove', (event) => {
+      if (!rect) updateRect();
       if (frameId) cancelAnimationFrame(frameId);
       frameId = requestAnimationFrame(() => {
-        const rect = element.getBoundingClientRect();
+        if (!rect) return;
         element.style.setProperty('--specular-x', `${event.clientX - rect.left}px`);
         element.style.setProperty('--specular-y', `${event.clientY - rect.top}px`);
       });
-    });
+    }, { passive: true });
+
     element.addEventListener('pointerleave', () => {
       if (frameId) cancelAnimationFrame(frameId);
+      rect = null;
       element.style.removeProperty('--specular-x');
       element.style.removeProperty('--specular-y');
-    });
+    }, { passive: true });
   };
 
   const header = document.querySelector('.header-inner');
   if (header) attachSpecularTracker(header);
 
+  const sidebar = document.querySelector('.module-sidebar');
+  if (sidebar) attachSpecularTracker(sidebar);
+
   // Topic card hover sheen using container delegation
   const topicGrid = $('topic-grid');
   if (topicGrid) {
     let cardFrameId = null;
+    let activeCard = null;
+    let cardRect = null;
+
     topicGrid.addEventListener('pointermove', (event) => {
       const card = event.target.closest('.topic-card');
-      if (!card) return;
+      if (!card) {
+        activeCard = null;
+        cardRect = null;
+        return;
+      }
+      if (card !== activeCard) {
+        activeCard = card;
+        cardRect = card.getBoundingClientRect();
+      }
       if (cardFrameId) cancelAnimationFrame(cardFrameId);
       cardFrameId = requestAnimationFrame(() => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--card-mouse-x', `${event.clientX - rect.left}px`);
-        card.style.setProperty('--card-mouse-y', `${event.clientY - rect.top}px`);
+        if (!cardRect) cardRect = card.getBoundingClientRect();
+        card.style.setProperty('--card-mouse-x', `${event.clientX - cardRect.left}px`);
+        card.style.setProperty('--card-mouse-y', `${event.clientY - cardRect.top}px`);
       });
-    });
-    topicGrid.addEventListener('pointerleave', (event) => {
+    }, { passive: true });
+
+    topicGrid.addEventListener('pointerleave', () => {
       if (cardFrameId) cancelAnimationFrame(cardFrameId);
-      const card = event.target.closest('.topic-card');
-      if (card) {
-        card.style.removeProperty('--card-mouse-x');
-        card.style.removeProperty('--card-mouse-y');
-      }
-    });
+      activeCard = null;
+      cardRect = null;
+    }, { passive: true });
   }
 }
 
@@ -190,6 +220,10 @@ function initLiquidSpecular() {
 // ==========================================================================
 function setAtmosphere(mode) {
   document.body.dataset.atmosphere = mode;
+  const atmoSwitch = document.querySelector('.atmosphere-switch');
+  if (atmoSwitch) {
+    atmoSwitch.dataset.active = mode;
+  }
   document.querySelectorAll('.atmo-tab').forEach((tab) => {
     tab.classList.toggle('active', tab.dataset.atmo === mode);
   });
@@ -200,8 +234,17 @@ function setAtmosphere(mode) {
 }
 
 function initAtmosphere() {
-  const saved = localStorage.getItem('bagu-atmosphere') || 'aurora';
+  const urlAtmo = urlParams.get('atmo');
+  const saved = urlAtmo || localStorage.getItem('bagu-atmosphere') || 'aurora';
+  
+  // Suppress transitions on initial load to prevent flashing
+  document.body.classList.add('no-transition');
   setAtmosphere(saved);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.body.classList.remove('no-transition');
+    });
+  });
 
   document.querySelectorAll('.atmo-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -255,7 +298,165 @@ function initAuroraParallax() {
   }
 }
 
+function initHeaderCollapse() {
+  const brandToggle = $('brand-toggle');
+  if (!brandToggle) return;
+
+  function setHeaderCollapsed(collapsed) {
+    document.body.classList.toggle('header-collapsed', collapsed);
+    brandToggle.setAttribute('aria-expanded', String(!collapsed));
+    brandToggle.title = collapsed ? '展开顶部导航' : '收起顶部导航';
+    brandToggle.setAttribute('aria-label', collapsed ? '展开顶部导航' : '收起顶部导航');
+    try {
+      localStorage.setItem('bagu-header-collapsed', collapsed ? 'true' : 'false');
+    } catch (_) {}
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isUrlCollapsed = urlParams.get('collapsed') === 'true';
+  const saved = localStorage.getItem('bagu-header-collapsed') === 'true';
+  if (isUrlCollapsed || saved) {
+    setHeaderCollapsed(true);
+  }
+
+  brandToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    const isCurrentlyCollapsed = document.body.classList.contains('header-collapsed');
+    setHeaderCollapsed(!isCurrentlyCollapsed);
+  });
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const topicParam = urlParams.get('topic');
+if (topicParam !== null && !isNaN(Number(topicParam))) {
+  state.topicIndex = Number(topicParam);
+}
+
+function initModuleNavHoverTracker() {
+  const nav = $('module-nav');
+  if (!nav) return;
+  nav.classList.add('has-lens');
+
+  let activeIndex = null;
+  let isInside = false;
+
+  function getLens() {
+    let lens = nav.querySelector('.module-nav-lens');
+    if (!lens) {
+      lens = document.createElement('span');
+      lens.className = 'module-nav-lens';
+      lens.setAttribute('aria-hidden', 'true');
+      nav.prepend(lens);
+    }
+    return lens;
+  }
+
+  function moveLensTo(button, animate = true) {
+    const lens = getLens();
+    const allButtons = nav.querySelectorAll('.module-link');
+    allButtons.forEach(b => b.classList.remove('is-hovered'));
+
+    if (!button) {
+      lens.style.transition = 'opacity 0.18s ease-out, transform 0.18s var(--apple-spring)';
+      lens.style.transform = lens.style.transform.replace(/scale\([^)]+\)/, 'scale(0.96)');
+      lens.style.opacity = '0';
+      return;
+    }
+    button.classList.add('is-hovered');
+
+    const navRect = nav.getBoundingClientRect();
+    const btnRect = button.getBoundingClientRect();
+    const top = btnRect.top - navRect.top;
+    const height = btnRect.height;
+    const isActive = button.classList.contains('active');
+
+    lens.classList.toggle('is-active-item', isActive);
+
+    // Fast, buoyant Apple spring tracking: 130ms snappy spring with slight 3D elevation
+    lens.style.transition = animate
+      ? 'transform 0.13s cubic-bezier(0.16, 1, 0.3, 1), height 0.13s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.12s ease-out, background 0.12s ease-out, border-color 0.12s ease-out, box-shadow 0.14s ease-out'
+      : 'opacity 0.12s ease-out, transform 0.18s var(--apple-spring)';
+    lens.style.transform = `translateY(${top - 1.5}px) scale(1.015)`;
+    lens.style.height = `${height}px`;
+    lens.style.opacity = '1';
+  }
+
+  let specularFrameId = null;
+
+  nav.addEventListener('pointermove', (event) => {
+    const buttons = Array.from(nav.querySelectorAll('.module-link'));
+    if (!buttons.length) return;
+
+    let targetBtn = event.target.closest('.module-link');
+    let targetIndex = buttons.indexOf(targetBtn);
+
+    if (targetIndex === -1) {
+      const navRect = nav.getBoundingClientRect();
+      targetIndex = event.clientY < (navRect.top + navRect.height / 2) ? 0 : buttons.length - 1;
+    }
+
+    if (targetIndex !== -1) {
+      const btn = buttons[targetIndex];
+      if (targetIndex !== activeIndex) {
+        activeIndex = targetIndex;
+        moveLensTo(btn, isInside);
+        isInside = true;
+      }
+
+      // Real-time specular spotlight tracking under the pointer
+      const lens = getLens();
+      const btnRect = btn.getBoundingClientRect();
+      const mouseX = event.clientX - btnRect.left;
+      const mouseY = event.clientY - btnRect.top;
+
+      if (specularFrameId) cancelAnimationFrame(specularFrameId);
+      specularFrameId = requestAnimationFrame(() => {
+        lens.style.setProperty('--lens-mouse-x', `${mouseX}px`);
+        lens.style.setProperty('--lens-mouse-y', `${mouseY}px`);
+      });
+    }
+  }, { passive: true });
+
+  nav.addEventListener('pointerleave', () => {
+    if (specularFrameId) cancelAnimationFrame(specularFrameId);
+    isInside = false;
+    activeIndex = null;
+    const allButtons = nav.querySelectorAll('.module-link');
+    allButtons.forEach(b => b.classList.remove('is-hovered'));
+    const lens = getLens();
+    lens.classList.remove('is-active-item');
+    lens.style.transition = 'opacity 0.18s ease-out, transform 0.18s var(--apple-spring)';
+    const currentY = lens.style.transform.match(/translateY\([^)]+\)/)?.[0] || 'translateY(0px)';
+    lens.style.transform = `${currentY} scale(0.96)`;
+    lens.style.opacity = '0';
+  }, { passive: true });
+}
+
 render();
 initLiquidSpecular();
 initAtmosphere();
 initAuroraParallax();
+initHeaderCollapse();
+initModuleNavHoverTracker();
+
+if (urlParams.get('hover-demo') === 'true') {
+  setTimeout(() => {
+    const links = document.querySelectorAll('.module-link');
+    if (links[1]) {
+      const lens = document.querySelector('.module-nav-lens');
+      const nav = $('module-nav');
+      if (lens && nav) {
+        const navRect = nav.getBoundingClientRect();
+        const btnRect = links[1].getBoundingClientRect();
+        lens.style.transform = `translateY(${btnRect.top - navRect.top - 1.5}px) scale(1.015)`;
+        lens.style.height = `${btnRect.height}px`;
+        lens.style.setProperty('--lens-mouse-x', `${btnRect.width * 0.45}px`);
+        lens.style.setProperty('--lens-mouse-y', `${btnRect.height * 0.5}px`);
+        lens.style.opacity = '1';
+        links[1].classList.add('is-hovered');
+      }
+    }
+    const cards = document.querySelectorAll('.topic-card');
+    if (cards[1]) cards[1].classList.add('pseudo-hover');
+  }, 100);
+}
