@@ -68,7 +68,14 @@ function render() {
     tab.setAttribute('aria-selected', String(active));
     tab.tabIndex = active ? 0 : -1;
   }
-  document.querySelector('.track-switch').dataset.active = state.track;
+  const trackSwitch = document.querySelector('.track-switch');
+  if (trackSwitch) trackSwitch.dataset.active = state.track;
+  const trackBadge = $('header-track-badge');
+  if (trackBadge) {
+    trackBadge.dataset.track = state.track;
+    const badgeText = $('track-badge-text');
+    if (badgeText) badgeText.textContent = state.track === 'agent' ? 'Agent' : '后端';
+  }
   $('workspace').setAttribute('aria-labelledby', `tab-${state.track}`);
   const pageTitle = $('page-title');
   if (pageTitle) pageTitle.textContent = track.title;
