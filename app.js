@@ -354,39 +354,143 @@ function initAtmosphere() {
 
 function initHeaderCollapse() {
   const brandToggle = $('brand-toggle');
-  if (!brandToggle) return;
+  const headerInner = document.querySelector('.header-inner');
+  const brandGroup = document.querySelector('.brand-group');
+  if (!headerInner) return;
 
-  function setHeaderCollapsed(collapsed) {
-    document.body.classList.toggle('header-collapsed', collapsed);
-    brandToggle.setAttribute('aria-expanded', String(!collapsed));
-    brandToggle.title = collapsed ? '展开顶部导航' : '收起顶部导航';
-    brandToggle.setAttribute('aria-label', collapsed ? '展开顶部导航' : '收起顶部导航');
+  let isPinned = true;
+  let peekEnterTimer = null;
+  let peekLeaveTimer = null;
+
+  function updateAriaAndTitles(collapsed) {
+    const hint = '快捷键: \\ 或 ⌘.';
+    const label = collapsed ? `展开顶部导航 (${hint})` : `收起顶部导航 (${hint})`;
+    if (brandToggle) {
+      brandToggle.setAttribute('aria-expanded', String(!collapsed));
+      brandToggle.title = label;
+      brandToggle.setAttribute('aria-label', label);
+    }
+    if (brandGroup) {
+      brandGroup.title = label;
+      brandGroup.setAttribute('aria-label', label);
+    }
+    if (headerInner) {
+      if (collapsed) {
+        headerInner.setAttribute('title', `点击展开或悬浮探视 (${hint})`);
+        headerInner.setAttribute('role', 'button');
+        headerInner.setAttribute('aria-label', `展开顶部导航 (${hint})`);
+      } else {
+        headerInner.removeAttribute('title');
+        headerInner.removeAttribute('role');
+        headerInner.removeAttribute('aria-label');
+      }
+    }
+  }
+
+  function setPinnedState(pinned) {
+    isPinned = pinned;
+    if (peekEnterTimer) { clearTimeout(peekEnterTimer); peekEnterTimer = null; }
+    if (peekLeaveTimer) { clearTimeout(peekLeaveTimer); peekLeaveTimer = null; }
+    document.body.classList.remove('header-peeking');
+    document.body.classList.toggle('header-collapsed', !pinned);
+    updateAriaAndTitles(!pinned);
     try {
-      localStorage.setItem('bagu-header-collapsed', collapsed ? 'true' : 'false');
+      localStorage.setItem('bagu-header-collapsed', !pinned ? 'true' : 'false');
     } catch (_) {}
   }
 
+  // Initial state check
   const urlParams = new URLSearchParams(window.location.search);
   const isUrlCollapsed = urlParams.get('collapsed') === 'true';
   const saved = localStorage.getItem('bagu-header-collapsed') === 'true';
   if (isUrlCollapsed || saved) {
-    setHeaderCollapsed(true);
+    setPinnedState(false);
+  } else {
+    setPinnedState(true);
   }
 
-  brandToggle.addEventListener('click', (e) => {
-    e.preventDefault();
-    const isCurrentlyCollapsed = document.body.classList.contains('header-collapsed');
-    setHeaderCollapsed(!isCurrentlyCollapsed);
+  // --- Smart Hover-to-Peek & Auto-Retract ---
+  headerInner.addEventListener('mouseenter', () => {
+    if (isPinned) return;
+    if (peekLeaveTimer) {
+      clearTimeout(peekLeaveTimer);
+      peekLeaveTimer = null;
+    }
+    peekEnterTimer = setTimeout(() => {
+      if (!isPinned && document.body.classList.contains('header-collapsed')) {
+        document.body.classList.remove('header-collapsed');
+        document.body.classList.add('header-peeking');
+        updateAriaAndTitles(false);
+      }
+    }, 140);
   });
 
-  const brandName = document.querySelector('.brand-name');
-  if (brandName) {
-    brandName.addEventListener('click', () => {
-      if (document.body.classList.contains('header-collapsed')) {
-        setHeaderCollapsed(false);
-      }
+  headerInner.addEventListener('mouseleave', () => {
+    if (peekEnterTimer) {
+      clearTimeout(peekEnterTimer);
+      peekEnterTimer = null;
+    }
+    if (!isPinned && document.body.classList.contains('header-peeking')) {
+      peekLeaveTimer = setTimeout(() => {
+        if (!isPinned) {
+          document.body.classList.add('header-collapsed');
+          document.body.classList.remove('header-peeking');
+          updateAriaAndTitles(true);
+        }
+      }, 420);
+    }
+  });
+
+  // --- Click to Toggle / Pin ---
+  if (brandGroup) {
+    brandGroup.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setPinnedState(!isPinned);
     });
   }
+
+  if (brandToggle) {
+    brandToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setPinnedState(!isPinned);
+    });
+  }
+
+  headerInner.addEventListener('click', (e) => {
+    if (e.target.closest('button, [role="tab"], .track-switch, .atmosphere-switch')) return;
+    if (!isPinned) {
+      e.preventDefault();
+      setPinnedState(true);
+    }
+  });
+
+  // --- macOS Double-Click Empty Glass to Collapse / Pin ---
+  headerInner.addEventListener('dblclick', (e) => {
+    if (e.target.closest('button, [role="tab"], .track-switch, .atmosphere-switch')) return;
+    e.preventDefault();
+    setPinnedState(!isPinned);
+  });
+
+  // --- Global Keyboard Shortcuts (\ and Cmd+.) ---
+  window.addEventListener('keydown', (e) => {
+    if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+    const isToggleKey = e.key === '\\' || ((e.metaKey || e.ctrlKey) && e.key === '.');
+    if (isToggleKey) {
+      e.preventDefault();
+      setPinnedState(!isPinned);
+    } else if (e.key === 'Escape') {
+      if (isPinned) {
+        setPinnedState(false);
+      } else if (document.body.classList.contains('header-peeking')) {
+        if (peekLeaveTimer) clearTimeout(peekLeaveTimer);
+        document.body.classList.add('header-collapsed');
+        document.body.classList.remove('header-peeking');
+        updateAriaAndTitles(true);
+      }
+    }
+  });
 }
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -561,5 +665,10 @@ if (urlParams.get('demo-mist')) {
     const tab = document.querySelector(`.atmo-tab[data-atmo="${urlParams.get('demo-mist')}"]`);
     if (tab) tab.click();
   }, 100);
+}
+
+if (urlParams.get('hover-header') === 'true') {
+  const headerInner = document.querySelector('.header-inner');
+  if (headerInner) headerInner.classList.add('pseudo-hover');
 }
 

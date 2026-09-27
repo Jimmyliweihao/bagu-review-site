@@ -27,8 +27,8 @@
     </div>
     <header class="site-header">
       <div class="header-inner">
-        <div class="brand-group">
-          <button id="brand-toggle" class="brand-mark-btn" type="button" aria-expanded="true" aria-label="收起顶部导航" title="收起顶部导航 (沉浸模式)">
+        <div class="brand-group" id="brand-group" role="button" tabindex="0" aria-label="收起顶部导航 (快捷键: \ 或 ⌘.)" title="收起顶部导航 (快捷键: \ 或 ⌘.)">
+          <button id="brand-toggle" class="brand-mark-btn" type="button" aria-expanded="true" aria-label="收起顶部导航" tabindex="-1">
             <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
           </button>
           <span class="brand-name">八股复习站</span>
@@ -61,6 +61,11 @@
             </button>
           </div>
         </div>
+        <div class="header-expand-indicator" aria-hidden="true" title="展开顶部导航">
+          <svg class="expand-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </div>
       </div>
     </header>
 
@@ -79,7 +84,18 @@
           </section>
           <section class="question-panel" aria-labelledby="question-heading">
             <div class="question-panel-head"><h3 id="question-heading">题目</h3><span class="question-count">0 道题</span></div>
-            <div class="empty-state"><div class="empty-icon" aria-hidden="true"><span></span><span></span><span></span></div><strong id="empty-title">还没有题目</strong><p id="empty-description">选择一个复习方向，之后可在这里查看题目。</p></div>
+            <div class="empty-state">
+              <div class="empty-icon" aria-hidden="true">
+                <svg class="empty-symbol" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
+                  <path d="M8 7h8"/>
+                  <path d="M8 11h6"/>
+                  <path d="M8 15h4"/>
+                </svg>
+              </div>
+              <strong id="empty-title">还没有题目</strong>
+              <p id="empty-description">选择一个复习方向，之后可在这里查看题目。</p>
+            </div>
           </section>
         </section>
       </div>
