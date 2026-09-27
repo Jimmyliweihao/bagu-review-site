@@ -58,9 +58,9 @@
   --apple-press: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   /* Apple Cinematic Ambient Dissolve Physics (Tranquil Ambient Deceleration Curve) */
-  --ambient-fade-timing: cubic-bezier(0.12, 1, 0.28, 1);
-  --ambient-fade-duration: 1.75s;
-  --ambient-text-duration: 1.75s;
+  --ambient-fade-timing: cubic-bezier(0.32, 0.04, 0.22, 1);
+  --ambient-fade-duration: 2.2s;
+  --ambient-text-duration: 2.2s;
   
   /* Layout Sizing */
   --sidebar-width: 260px;
@@ -656,7 +656,7 @@ body.header-collapsed .brand-mark span:nth-child(2) {
   z-index: 2;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  width: 280px;
+  width: 220px;
   height: 36px;
   padding: 3px;
   border-radius: var(--radius-pill);
@@ -736,18 +736,20 @@ body[data-atmosphere="obsidian"] .track-lens {
   z-index: 2;
   height: 30px;
   min-height: 30px;
-  padding: 0 14px;
-  display: flex;
+  padding: 0 10px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 5px;
   border: 0;
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--label-secondary);
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 550;
   letter-spacing: -0.01em;
   cursor: pointer;
+  white-space: nowrap;
   transition: color var(--ambient-text-duration) ease, background 0.18s ease, transform 0.15s var(--apple-press);
 }
 
@@ -757,7 +759,7 @@ body[data-atmosphere="obsidian"] .track-lens {
 }
 
 .track-tab:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
 .track-tab[aria-selected=true] {
@@ -776,6 +778,22 @@ body[data-atmosphere="obsidian"] .track-tab:not([aria-selected=true]):hover {
 
 body[data-atmosphere="obsidian"] .track-tab[aria-selected=true] {
   color: #ffffff;
+}
+
+/* Track Micro-Glyph SVG Styling (Unified with atmo-icon) */
+.track-icon {
+  flex-shrink: 0;
+  opacity: 0.72;
+  transition: opacity 0.2s ease, transform 0.2s var(--apple-spring);
+}
+
+.track-tab[aria-selected=true] .track-icon {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.track-tab:hover .track-icon {
+  opacity: 0.95;
 }
 
 /* Apple-style Atmosphere Switcher */
@@ -942,29 +960,7 @@ body[data-atmosphere="obsidian"] .atmo-tab.active {
   opacity: 0.95;
 }
 
-/* Subtle Hairline Dividers between unselected tabs */
-.atmo-tab:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: 25%;
-  height: 50%;
-  width: 1px;
-  background: rgba(60, 60, 67, 0.12);
-  transition: opacity 0.25s ease;
-  pointer-events: none;
-}
 
-body[data-atmosphere="obsidian"] .atmo-tab:not(:last-child)::after {
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.atmosphere-switch[data-active="aurora"] .atmo-tab:nth-child(1)::after,
-.atmosphere-switch[data-active="daylight"] .atmo-tab:nth-child(1)::after,
-.atmosphere-switch[data-active="daylight"] .atmo-tab:nth-child(2)::after,
-.atmosphere-switch[data-active="obsidian"] .atmo-tab:nth-child(2)::after {
-  opacity: 0;
-}
 
 /* ==========================================================================
    4. Workspace Chassis & Layout
@@ -1984,25 +1980,26 @@ body[data-atmosphere="obsidian"] .empty-icon {
   position: absolute;
   top: 0;
   left: 0;
-  width: 240px;
-  height: 240px;
+  width: 260px;
+  height: 260px;
   border-radius: 50%;
   pointer-events: none;
   opacity: 0;
   transform: translate3d(-9999px, -9999px, 0) scale(0.1);
   will-change: transform, opacity;
   z-index: 2; /* Positioned directly behind glass cards, illuminating the spatial field */
-  filter: blur(80px); /* Optical crystal Gaussian dispersion: completely melts any perceptible edge */
+  filter: blur(55px); /* Optical crystal Gaussian dispersion: borderless, silky smooth atmospheric vapor */
 }
 
 /* 1. Daylight: Pristine Sunlit Morning Sky - 100% Pure White Luminous Mist */
 .backdrop-mist.mist-daylight {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(255, 255, 255, 0.88) 0%,
-    rgba(255, 255, 255, 0.65) 25%,
-    rgba(255, 255, 255, 0.35) 55%,
-    rgba(255, 255, 255, 0.10) 80%,
+    rgba(255, 255, 255, 0.98) 0%,
+    rgba(255, 255, 255, 0.92) 28%,
+    rgba(255, 255, 255, 0.76) 50%,
+    rgba(255, 255, 255, 0.45) 72%,
+    rgba(255, 255, 255, 0.15) 88%,
     transparent 100%
   );
 }
@@ -2011,10 +2008,11 @@ body[data-atmosphere="obsidian"] .empty-icon {
 .backdrop-mist.mist-aurora {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(240, 246, 255, 0.62) 0%,
-    rgba(224, 242, 254, 0.42) 25%,
-    rgba(230, 238, 255, 0.22) 55%,
-    rgba(240, 248, 255, 0.07) 80%,
+    rgba(240, 246, 255, 0.98) 0%,
+    rgba(224, 242, 254, 0.90) 28%,
+    rgba(230, 238, 255, 0.72) 50%,
+    rgba(240, 248, 255, 0.40) 72%,
+    rgba(240, 248, 255, 0.12) 88%,
     transparent 100%
   );
 }
@@ -2023,10 +2021,11 @@ body[data-atmosphere="obsidian"] .empty-icon {
 .backdrop-mist.mist-obsidian {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(0, 0, 0, 0.72) 0%,
-    rgba(7, 8, 12, 0.52) 25%,
-    rgba(14, 15, 20, 0.28) 55%,
-    rgba(20, 22, 30, 0.08) 80%,
+    rgba(0, 0, 0, 0.98) 0%,
+    rgba(5, 6, 10, 0.92) 28%,
+    rgba(12, 14, 20, 0.75) 50%,
+    rgba(18, 20, 28, 0.42) 72%,
+    rgba(20, 22, 30, 0.15) 88%,
     transparent 100%
   );
 }

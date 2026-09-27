@@ -249,9 +249,9 @@ function triggerAmbientMistDiffusion(x, y, targetMode) {
     Math.max(y, window.innerHeight - y)
   );
 
-  // The base mist element has a radius of 120px (240px diameter).
-  // Target scale covers maxDist with a 35% margin to ensure the soft Gaussian falloff envelops corners.
-  const targetScale = Math.max(20, Math.ceil((maxDist * 1.35) / 120));
+  // The base mist element has a radius of 130px (260px diameter).
+  // Target scale covers maxDist with a 45% margin to ensure the soft Gaussian falloff envelops corners.
+  const targetScale = Math.max(22, Math.ceil((maxDist * 1.45) / 130));
 
   mist.className = `backdrop-mist mist-${targetMode}`;
   mist.style.left = `${x.toFixed(1)}px`;
@@ -259,32 +259,43 @@ function triggerAmbientMistDiffusion(x, y, targetMode) {
 
   currentMistAnim = mist.animate([
     {
-      transform: 'translate3d(-50%, -50%, 0) scale(0.1)',
+      // 0.00s: Gathers right at the clicked button touchpoint
+      transform: 'translate3d(-50%, -50%, 0) scale(0.06)',
       opacity: 0
     },
     {
-      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 0.25)})`,
-      opacity: 0.85,
-      offset: 0.22
+      // 0.18s (8%): Bursts into a prominent luminous mist nucleus right at the button
+      transform: `translate3d(-50%, -50%, 0) scale(${Math.max(1, Math.round(targetScale * 0.12))})`,
+      opacity: 0.98,
+      offset: 0.08
     },
     {
-      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 0.65)})`,
-      opacity: 0.60,
-      offset: 0.55
+      // 0.66s (30%): Sweeps smoothly across the top bar and upper workspace
+      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 0.40)})`,
+      opacity: 0.95,
+      offset: 0.30
     },
     {
+      // 1.32s (60%): Rolls majestically across the main cards and sidebar
+      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 0.75)})`,
+      opacity: 0.88,
+      offset: 0.60
+    },
+    {
+      // 1.80s (82%): Envelops all corners of the entire screen completely
       transform: `translate3d(-50%, -50%, 0) scale(${targetScale})`,
-      opacity: 0.20,
-      offset: 0.85
+      opacity: 0.60,
+      offset: 0.82
     },
     {
-      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 1.15)})`,
+      // 2.20s (100%): Seamlessly melts into the final atmosphere
+      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 1.18)})`,
       opacity: 0,
       offset: 1.0
     }
   ], {
-    duration: 1750,
-    easing: 'cubic-bezier(0.12, 1, 0.28, 1)',
+    duration: 2200,
+    easing: 'cubic-bezier(0.22, 0.65, 0.35, 1)',
     fill: 'forwards'
   });
 
@@ -330,10 +341,9 @@ function initAtmosphere() {
         });
       } catch (_) {}
 
-      // Permeate organic ambient mist radially outward from (x, y) across the screen
+      // Single continuous harmonious wave:
+      // Launch mist from button and synchronously transition atmosphere in unified 2.2s S-curve
       triggerAmbientMistDiffusion(x, y, mode);
-
-      // Synchronous seamless transition in perfect 0.95s phase alignment (zero stutter)
       setAtmosphere(mode);
       try {
         localStorage.setItem('bagu-atmosphere', mode);
@@ -543,6 +553,13 @@ if (urlParams.get('hover-demo') === 'true') {
     }
     const cards = document.querySelectorAll('.topic-card');
     if (cards[1]) cards[1].classList.add('pseudo-hover');
+  }, 100);
+}
+
+if (urlParams.get('demo-mist')) {
+  setTimeout(() => {
+    const tab = document.querySelector(`.atmo-tab[data-atmo="${urlParams.get('demo-mist')}"]`);
+    if (tab) tab.click();
   }, 100);
 }
 

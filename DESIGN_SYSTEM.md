@@ -123,10 +123,11 @@ $$\text{Radius}_{\text{inner}} = \text{Radius}_{\text{outer}} - \text{Padding}$$
 - **触点聚焦（Focal Touchpoint）**：工具栏/导航栏的品牌文字必须保持纯净的 Typography 呼吸展示。悬浮与点击反馈应精准收敛于功能性超椭圆徽标（`.brand-mark`）本身（$1.04\times$ 弹性微缩放 + 微晶切边反光），严禁给整段文字强加背景贴片；
 - **视觉降噪与去药丸标签（Toolbar Quiet Dignity）**：严禁在品牌 Logo 旁硬塞“`< 收起`”这类非标准的促销式/管理后台式药丸标签；折叠意图应通过系统原生 Tooltip (`title`)、无障碍属性 (`aria-expanded`) 与图标形态呼吸表达，坚守 Apple 产品的克制与留白。
 
-### 5. 36px 黄金高度分段器与晶体微符规范 (36px Toolbar & Switcher Standard)
-- **黄金高度对齐**：工具栏中央方向切换器（`.track-switch`）与右侧氛围切换器（`.atmosphere-switch`）严格统一锁定为 **36px 黄金高度**，外层顶栏外壳维持 `min-height: 60px`；
-- **晶体微符指示**：氛围控制器集成高精度晶体微符（`✦ 极光`、`☀️ 晨曦`、`🌙 暗夜`），字号 12.5px，图标与文字保持 5px 留白；
-- **毛细分隔线**：标签之间注入 `1px × 14px` 的微细晶体分隔线（`rgba(60, 60, 67, 0.14)`），当任一相邻 Tab 处于激活或悬浮态时平滑隐退；
+### 5. 36px 黄金高度分段器与孪生微符规范 (36px Twin-Capsule Switcher Standard)
+- **孪生组件高度与几何对齐**：工具栏中央复习方向切换器（`.track-switch`）与右侧氛围切换器（`.atmosphere-switch`）作为孪生分段控制器，高度严格锁定为 **36px 黄金高度**（内层透镜 30px，四周等距内边距 3px），圆角严格采用 `var(--radius-pill)`；
+- **全员晶体微符指示**：两组控制器统一配置 13px SF 风格高精度矢量微符（后端 `🗄️ Server`、Agent `🤖 Bot`、极光 `✦`、晨曦 `☼`、暗夜 `☾`），图标与文字统一保持 5px 留白；图标默认 `opacity: 0.72`，激活态微放大至 `scale(1.08)` 并达到 100% 不透明度；
+- **字阶与视觉密度平衡**：排版字号统一采用 `12.5px`（字重 550，`-0.01em` 字间距）。方向控制器总宽精密收拢至黄金比例 **220px**（双项单格约 107px），与右侧自适应氛围控制器（三项总宽约 200px）在视觉重心上达成对称均衡，消除留白过剩导致的空旷与笨重感；
+- **一体流体滑轨（Unified Seamless Track）**：分段控制器内部严禁插入传统硬性毛细竖线分隔符（Hairline Dividers），维持底槽一体通透流动的微晶凹槽，纯粹由单个物理透镜（Single Lens）弹性滑移承托选项状态，消除视觉杂音与玻璃割裂感；
 - **品牌区触点解耦**：品牌 Logo 超椭圆徽标封装为独立交互按钮（`.brand-mark-btn`），折叠顶栏行为严格收敛于徽标本身，避免点击品牌文字误触发折叠。
 
 ### 6. 视网膜水感分段滑块规范 (Liquid Glass Slider Formula)
@@ -187,20 +188,23 @@ $$\text{Radius}_{\text{inner}} = \text{Radius}_{\text{outer}} - \text{Padding}$$
 
 #### 3. 电影级环境水墨弥漫与零瞬断规则 (Cinematic Ambient Mist Permeation)
 浅色与暗色模式的切换严禁生硬跳变与闪烁晕眩：
-- **消灭渲染断点与滤镜闪变（禁止 `display: none` 与动态 `filter` 补间）**：严禁在暗夜模式下对 `.backdrop-mesh` 设置 `display: none !important`；光球维持固定滤镜，仅通过硬件级 `opacity: 0` 在 `1.75s cubic-bezier(0.12, 1, 0.28, 1)` 内平滑隐退与升起；
-- **三层底色并行融解与零下陷基底（GPU Direct Cross-Fade & Zero Luminance Dip）**：在 `.apple-spatial-backdrop` 内部并行放置三层独立的渐变层（`.backdrop-aurora`, `.backdrop-daylight`, `.backdrop-obsidian`），由 GPU `opacity 1.75s` 进行混合交叠，底座背景色随模式同频过渡，杜绝中间帧透底露黑导致的“亮度下陷抽搐（Luminance Dip）”；
+- **消灭渲染断点与滤镜闪变（禁止 `display: none` 与动态 `filter` 补间）**：严禁在暗夜模式下对 `.backdrop-mesh` 设置 `display: none !important`；光球维持固定滤镜，仅通过硬件级 `opacity: 0` 在 `2.2s cubic-bezier(0.32, 0.04, 0.22, 1)` 内平滑隐退与升起；
+- **三层底色并行融解与零下陷基底（GPU Direct Cross-Fade & Zero Luminance Dip）**：在 `.apple-spatial-backdrop` 内部并行放置三层独立的渐变层（`.backdrop-aurora`, `.backdrop-daylight`, `.backdrop-obsidian`），由 GPU `opacity` 进行混合交叠，底座背景色随模式同频过渡，杜绝中间帧透底露黑导致的“亮度下陷抽搐（Luminance Dip）”；
 - **视网膜同构阴影对齐（Shadow Isomorphism）**：浅色与暗色模式下的 `box-shadow` **投影层数必须严格一对一对齐**（如 4 层对 4 层），杜绝因层数不匹配导致浏览器无法数学插值而产生边缘瞬闪；
-- **全局 1.75s 缓入缓出调光**：全站卡片、外框、边框与文字统一配置 **1.75s + `cubic-bezier(0.12, 1, 0.28, 1)`** 影院级平滑 S 曲线，给瞳孔充分适应时间。
+- **全局 2.2s 影院级平滑溶解调光**：全站卡片、外框、边框与文字统一配置 **2.2s + `cubic-bezier(0.32, 0.04, 0.22, 1)`** 影院级平滑 S 曲线，前 600ms 变化率 $\le 5\%$，为按钮处水雾留出绝对主导的视觉舞台。
 
-#### 4. 点光源全局水墨弥漫体系 (Ambient Mist Permeation Engine - Organic Radial Diffusion)
-当用户点击顶部 `.atmosphere-switch` 切换极光、晨曦与暗夜模式时，采用真正的点光源水墨/晨雾弥散体系：
-- **物理触点锚定辐射原点**：以用户点击按钮的物理坐标 $(x, y)$ 为真实点光源，生成纯正圆 1:1 高斯扩散光幕（`.backdrop-mist`），从按钮中心以 `scale(0.1)` 诞生，随时间向全屏外扩漫散，直径覆盖超 3500px，确保连绵覆盖至视口最远角落；
-- **零切线边界与零方形裁切法则 (Zero Box / Zero-Cutoff Law)**：严禁使用任何 `16:9` 矩形 DOM 的物理尺度放大（防止长方形边角外推感）；光幕自身为严格正圆形，叠加 `filter: blur(80px)` 晶体高斯超羽化，漫散波前无可见几何硬线，呈现如同水墨滴入清水、天光穿透云海般的有机“弥漫”感；
+#### 4. 2.2s 连续无缝水墨弥散体系 (Seamless Organic Mist Diffusion Engine)
+当用户点击顶部 `.atmosphere-switch` 切换极光、晨曦与暗夜模式时，采用真正的单段无缝连续流体水墨弥散体系：
+- **物理触点锚定辐射原点**：以用户点击按钮的物理坐标 $(x, y)$ 为真实点光源，生成纯正圆 1:1 高斯扩散光幕（`.backdrop-mist`），从按钮中心以 `scale(0.06)` 诞生，随时间向全屏外扩漫散，直径覆盖超 3500px，确保连绵覆盖至视口最远角落；
+- **单段浑然天成（杜绝二段顿挫）**：严禁使用 `setTimeout` 将动画切分为独立两段；点击瞬时水雾与底层环境 **100% 同步启动**，实现真正的单一物理波浪连续推进；
+- **前缓后释 S 型动能对齐**：全屏背景与文字统一配置 **2.2s `cubic-bezier(0.32, 0.04, 0.22, 1)`** S 型缓启动阻尼曲线（前 600ms 变化率 $\le 5\%$），将视觉首要焦点完全赋予在按钮处以 `cubic-bezier(0.22, 0.65, 0.35, 1)` 诞生的 98% 峰值高密度水雾；
+- **水雾包覆与全局融接**：随着水雾在中程（0.6s~1.5s）稳健从容地向全屏滚滚推开，底层渐变在水雾波前下方加速升起，并在 2.2s 终点水雾散尽时完美接管，达成“水雾自按钮推涌全屏、浑然一体无缝交接”的丝滑体验；
+- **零切线边界与零方形裁切法则 (Zero Box / Zero-Cutoff Law)**：严禁使用任何 `16:9` 矩形 DOM 的物理尺度放大；光幕自身为严格正圆形，叠加 `filter: blur(55px)` 晶体高斯超羽化，漫散波前无可见几何硬线，呈现如同水墨滴入清水、天光穿透云海般的有机“弥漫”感；
 - **目标色彩真实对齐与零颜色突变**：
-  - **极光 (Aurora)**：采用与极光实景完美同构的北欧晨曦天光纯净白蓝浅调（核心 `rgba(240, 246, 255)` 至外围 `rgba(224, 242, 254)`），严禁使用刺眼的伪色霓虹紫，消除终态亮度阶跃与突变；
+  - **极光 (Aurora)**：采用与极光实景完美同构的北欧晨曦天光纯净白蓝浅调（核心 `rgba(240, 246, 255)` 至外围 `rgba(224, 242, 254)`），消除终态亮度阶跃与突变；
   - **晨曦 (Daylight)**：100% 极纯白日照水雾（全阶纯白 `rgba(255, 255, 255, ...)`），纯白阳光温柔抚平全屏；
   - **暗夜 (Obsidian)**：深邃夜幕水墨琉璃（`#000000` 核心漫散至深熏黑曜）；
-- **零强制回流与 GPU 纯硬件合成**：点击处理中彻底废除 `void element.offsetWidth` 等同步回流调用；采用 Web Animations API (`element.animate`) 驱动硬件变换，保证在 1.75s 内以 `cubic-bezier(0.12, 1, 0.28, 1)` 满帧 120 FPS 展开，并与底层 1.75s CSS 属性过渡毫秒级同频平息。
+- **零强制回流与 GPU 纯硬件合成**：点击处理中彻底废除 `void element.offsetWidth` 等同步回流调用；微动效统一采用硬件级 Web Animations API (`element.animate`) 驱动，实现 100% 满帧硬件合成。
 
 
 
