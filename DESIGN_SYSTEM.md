@@ -243,6 +243,24 @@ $$\text{Radius}_{\text{inner}} = \text{Radius}_{\text{outer}} - \text{Padding}$$
 5. **Pro 键盘流全局快捷键**：
    - 全局按下 **`\`**（斜杠）或 **`⌘ + .`**（Command + Period，Mac 沉浸快捷键），顶栏即时展开/折叠；展开/探视时按下 **`Escape`**，一键退出回沉浸模式。
 
+---
+
+## 九、 顶栏果冻回弹力学与物理形变规范 (Capsule Jelly Spring & Flexbox Elasticity Specification)
+
+顶栏导航胶囊在收缩与展开时的物理回弹手感，必须遵循原生 macOS / iOS 水感流体动力学与视觉克制原则：
+
+1. **解构展开截断与 Flex 弹性释放 (Flex Shrink Clamping Resolution)**：
+   - **物理根因**：Flexbox 子元素默认带有 `flex-shrink: 1`。当展开目标为 `width: 100%` 时，若 cubic-bezier 产生超调（进度 $> 1.0$），浏览器 Flex 布局引擎会在每一帧将超出可用宽度的部分强行截断（Clamping）为 100%，导致展开超调彻底归零，用户完全感受不到回弹；
+   - **弹性释放**：必须在 `.header-inner` 上显式声明 `flex-shrink: 0;`，解除容器布局硬截断，使水感外壳在冲刺至全宽时具备物理级的自然张力超调与弹性收回能力。
+
+2. **非对称物理动能调校 (Asymmetric Kinetic Calibration)**：
+   - **展开张力微弹 (Expand Tension Spring)**：采用 `--apple-jelly-expand: cubic-bezier(0.24, 1.24, 0.42, 1);`（超调量严格收敛在 **+16px ~ +20px**，约占位移总量的 1.5%），如同一滴高表面张力水珠舒展至边界时的柔和张力微弹并优雅归位，既清晰可见又绝不触及视口边缘；
+   - **收缩磁吸微弹 (Retract Magnetic Haptic Spring)**：采用 `--apple-jelly-retract: cubic-bezier(0.28, 1.13, 0.46, 1);`（超调量严格收敛至 **-4.5px ~ -5px**，约占 260px 胶囊宽度的 1.8%），彻底消除早期高达 33px（12.6%）的浮夸剧烈橡皮筋抖动，呈现清脆、扎实、高档的 Apple 触感级磁吸阻尼。
+
+3. **容器弹性与排版静止严格解耦 (Container-Only Elasticity & Typographic Stillness)**：
+   - 严格遵循 Rule 5：果冻回弹仅赋予外层液体玻璃容器（`.header-inner`）的轮廓形态；
+   - 内部交互组件（`.track-switch`, `.header-actions`）一律使用标准阻尼 `var(--apple-spring)` 纯净滑入，**严禁内部控件与文字叠加二次拉扯或抖动**，保障阅读视线基准线绝对稳固。
+
 
 
 

@@ -100,4 +100,11 @@
 - **macOS 空白双击快速折叠 (Double-Click Empty Glass)**：顶栏空白玻璃区域任意双击直接切换折叠/锁定；
 - **Pro 键盘流全局快捷键**：全局按下 `\` 或 `⌘ + .` 一键切换折叠与展开，按 `Escape` 快速退回沉浸模式。
 
+### 13. 顶栏果冻回弹力学与物理形变规则 (Capsule Jelly Spring & Flexbox Elasticity Rule)
+- **解构展开截断与 Flex 弹性释放**：外层容器子元素必须显式配置 `flex-shrink: 0;`，彻底解除 Flexbox 对宽度超出 100% 阶段的硬截断，确保展开超调能够真正呈现；
+- **非对称物理动能调校**：
+  - **展开张力微弹**：`--apple-jelly-expand: cubic-bezier(0.24, 1.24, 0.42, 1);`，超调量严格收敛在 **+16px ~ +20px**，水面张力微冲并在视口安全区内自然收稳；
+  - **收缩磁吸微弹**：`--apple-jelly-retract: cubic-bezier(0.28, 1.13, 0.46, 1);`，超调量收敛至 **-4.5px ~ -5px**，杜绝剧烈橡皮筋抖动，呈现清脆扎实的触觉级磁吸；
+- **容器弹性与排版静止严格解耦**：果冻回弹仅作用于外层液体玻璃外壳（`.header-inner`），内部子元素（`.track-switch`, `.header-actions`）必须采用 `var(--apple-spring)` 纯净滑入，严禁内部控件与文字产生二次形变抖动。
+
 
