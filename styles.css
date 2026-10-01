@@ -56,16 +56,17 @@
   /* Apple Fluid Spring Physics Curve (Controls & Movement) */
   --apple-spring: cubic-bezier(0.16, 1, 0.3, 1);
   --apple-press: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --apple-jelly-expand: cubic-bezier(0.24, 1.24, 0.42, 1);
+  --apple-jelly-expand: cubic-bezier(0.3, 0.9, 0.52, 1.075);
   --apple-jelly-retract: cubic-bezier(0.28, 1.13, 0.46, 1);
 
   /* Apple Cinematic Ambient Dissolve Physics (Tranquil Ambient Deceleration Curve) */
-  --ambient-fade-timing: cubic-bezier(0.32, 0.04, 0.22, 1);
-  --ambient-fade-duration: 2.2s;
-  --ambient-text-duration: 2.2s;
+  --ambient-fade-timing: cubic-bezier(0.16, 1, 0.3, 1);
+  --ambient-fade-duration: 0.65s;
+  --ambient-text-duration: var(--ambient-fade-duration);
   
   /* Layout Sizing */
   --sidebar-width: 260px;
+  --header-collapsed-width: 260px;
 
   /* Apple HIG Corner Radius Hierarchy Tokens */
   --radius-island: 22px;      /* 浮动胶囊岛屿外壳 (Header, Module Sidebar) */
@@ -139,7 +140,7 @@ body {
   position: relative;
   transition: 
     background-color var(--ambient-fade-duration) var(--ambient-fade-timing), 
-    color var(--ambient-text-duration) ease;
+    color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 body[data-atmosphere="obsidian"] {
@@ -212,7 +213,7 @@ body[data-atmosphere="aurora"] .apple-spatial-backdrop {
   background-color: #f0f4fa;
 }
 
-/* Tri-layer Independent Ambient Gradients (GPU Direct Cross-Fade) */
+/* Opaque Aurora base with two cumulative, interruptible overlays. */
 .backdrop-gradient {
   position: absolute;
   inset: 0;
@@ -224,6 +225,7 @@ body[data-atmosphere="aurora"] .apple-spatial-backdrop {
 
 /* Aurora Mode Gradient */
 .backdrop-aurora {
+  opacity: 1;
   background:
     radial-gradient(130% 90% at 50% -10%, rgba(255, 255, 255, 0.95) 0%, rgba(240, 246, 255, 0.7) 50%, rgba(230, 240, 255, 0.85) 100%),
     linear-gradient(180deg, #f7faff 0%, #ebf2fa 100%);
@@ -231,6 +233,7 @@ body[data-atmosphere="aurora"] .apple-spatial-backdrop {
 
 /* Daylight Mode Gradient: Pristine Pure White Studio Canvas */
 .backdrop-daylight {
+  opacity: 0;
   background:
     radial-gradient(130% 90% at 50% -10%, #ffffff 0%, #fafbfc 65%, #f5f6f9 100%),
     linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
@@ -238,17 +241,13 @@ body[data-atmosphere="aurora"] .apple-spatial-backdrop {
 
 /* Obsidian Mode Gradient */
 .backdrop-obsidian {
+  opacity: 0;
   background:
     radial-gradient(85% 60% at 50% -10%, #111114 0%, #000000 70%, #000000 100%),
     linear-gradient(180deg, #090a0f 0%, #000000 100%);
 }
 
-/* Atmosphere-Driven Layer Opacity (Zero Reflow, Pure GPU Composite Cross-Fade) */
-body:not([data-atmosphere]) .backdrop-aurora,
-body[data-atmosphere="aurora"] .backdrop-aurora {
-  opacity: 1;
-}
-
+/* Aurora remains opaque underneath both mode overlays to prevent transparent gaps. */
 body[data-atmosphere="daylight"] .backdrop-daylight {
   opacity: 1;
 }
@@ -501,8 +500,7 @@ body[data-atmosphere="obsidian"] .backdrop-noise {
   pointer-events: auto;
 
   transition: 
-    width 0.62s var(--apple-jelly-expand),
-    padding 0.62s var(--apple-jelly-expand),
+    width 0.68s var(--apple-jelly-expand),
     transform 0.25s var(--apple-spring),
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
@@ -519,12 +517,11 @@ body[data-atmosphere="obsidian"] .header-inner {
 }
 
 body.header-collapsed .header-inner {
-  width: var(--sidebar-width);
-  padding: 0 14px 0 16px;
+  width: var(--header-collapsed-width);
+  padding: 0 16px;
   cursor: pointer;
   transition: 
     width 0.52s var(--apple-jelly-retract),
-    padding 0.52s var(--apple-jelly-retract),
     transform 0.25s var(--apple-spring),
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
@@ -592,9 +589,10 @@ body[data-atmosphere="obsidian"].header-collapsed .header-inner.pseudo-hover .br
     opacity 0.25s ease,
     transform 0.35s var(--apple-spring),
     visibility 0.25s ease,
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease;
+    background var(--ambient-fade-duration) var(--ambient-fade-timing),
+    border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
+    box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing),
+    color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .header-expand-indicator .expand-chevron {
@@ -688,7 +686,7 @@ body[data-atmosphere="obsidian"] .header-inner::after {
   user-select: none;
   transition: 
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
-    color var(--ambient-text-duration) ease,
+    color var(--ambient-text-duration) var(--ambient-fade-timing),
     transform 0.2s var(--apple-spring);
 }
 
@@ -742,7 +740,7 @@ body[data-atmosphere="obsidian"] .brand-group:hover .brand-name {
   letter-spacing: -0.015em;
   color: var(--label-primary);
   white-space: nowrap;
-  transition: color 0.15s ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 /* ==========================================================================
@@ -787,7 +785,7 @@ body[data-atmosphere="obsidian"] .brand-group:hover .brand-name {
     visibility 0.22s ease,
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
-    color var(--ambient-text-duration) ease,
+    color var(--ambient-text-duration) var(--ambient-fade-timing),
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
 }
 
@@ -824,7 +822,7 @@ body.header-collapsed .header-track-badge {
     visibility 0.35s ease 0.06s,
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
-    color var(--ambient-text-duration) ease,
+    color var(--ambient-text-duration) var(--ambient-fade-timing),
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
 }
 
@@ -906,7 +904,7 @@ body[data-atmosphere="obsidian"] .brand-mark {
   height: 2px;
   border-radius: 2px;
   background: var(--label-primary);
-  transition: width 0.25s var(--apple-spring), background-color var(--ambient-text-duration) ease;
+  transition: width 0.25s var(--apple-spring), background-color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .brand-mark span:nth-child(1) { width: 100%; }
@@ -935,9 +933,8 @@ body.header-collapsed .brand-mark span:nth-child(2) {
   border: 0.5px solid rgba(60, 60, 67, 0.08);
   box-shadow: inset 0 0.5px 1.5px rgba(0, 0, 0, 0.06);
   transition: 
-    opacity 0.35s ease 0.08s,
-    transform 0.45s var(--apple-spring) 0.08s,
-    visibility 0.35s ease 0.08s,
+    opacity 0.28s ease 0.18s,
+    visibility 0s linear 0.18s,
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
@@ -947,11 +944,9 @@ body.header-collapsed .track-switch {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateX(-70%) scale(0.92);
   transition: 
-    opacity 0.2s ease,
-    transform 0.35s var(--apple-spring),
-    visibility 0.2s ease;
+    opacity 0.18s ease,
+    visibility 0s linear 0.18s;
 }
 
 .track-lens {
@@ -1021,7 +1016,7 @@ body[data-atmosphere="obsidian"] .track-lens {
   letter-spacing: -0.01em;
   cursor: pointer;
   white-space: nowrap;
-  transition: color var(--ambient-text-duration) ease, background 0.18s ease, transform 0.15s var(--apple-press);
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing), background 0.18s ease, transform 0.15s var(--apple-press);
 }
 
 .track-tab:not([aria-selected=true]):hover {
@@ -1029,7 +1024,8 @@ body[data-atmosphere="obsidian"] .track-lens {
   background: rgba(255, 255, 255, 0.38);
 }
 
-.track-tab:active {
+.track-tab:active,
+.atmo-tab:active {
   transform: scale(0.96);
 }
 
@@ -1076,20 +1072,17 @@ body[data-atmosphere="obsidian"] .track-tab[aria-selected=true] {
   z-index: 2;
   flex-shrink: 0;
   transition: 
-    opacity 0.35s ease 0.08s,
-    transform 0.45s var(--apple-spring) 0.08s,
-    visibility 0.35s ease 0.08s;
+    opacity 0.28s ease 0.18s,
+    visibility 0s linear 0.18s;
 }
 
 body.header-collapsed .header-actions {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transform: translateX(-20px) scale(0.92);
   transition: 
-    opacity 0.2s ease,
-    transform 0.35s var(--apple-spring),
-    visibility 0.2s ease;
+    opacity 0.18s ease,
+    visibility 0s linear 0.18s;
 }
 
 .atmosphere-switch {
@@ -1180,7 +1173,7 @@ body[data-atmosphere="obsidian"] .atmo-lens {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  transition: color var(--ambient-text-duration) ease, background 0.18s ease, transform 0.15s var(--apple-press);
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing), background 0.18s ease, transform 0.15s var(--apple-press);
   text-align: center;
   white-space: nowrap;
 }
@@ -1190,14 +1183,10 @@ body[data-atmosphere="obsidian"] .atmo-lens {
   background: rgba(255, 255, 255, 0.38);
 }
 
-.atmo-tab:active {
-  transform: scale(0.96);
-}
-
 .atmo-tab.active {
   background: transparent;
   color: var(--label-primary);
-  font-weight: 600;
+  font-weight: 550;
   box-shadow: none;
 }
 
@@ -1219,12 +1208,12 @@ body[data-atmosphere="obsidian"] .atmo-tab.active {
 .atmo-icon {
   flex-shrink: 0;
   opacity: 0.72;
-  transition: opacity 0.2s ease, transform 0.2s var(--apple-spring);
+  transition: opacity var(--ambient-fade-duration) var(--ambient-fade-timing), transform var(--ambient-fade-duration) var(--ambient-fade-timing);
 }
 
 .atmo-tab.active .atmo-icon {
   opacity: 1;
-  transform: scale(1.08);
+  transform: scale(1.04);
 }
 
 .atmo-tab:hover .atmo-icon {
@@ -1258,7 +1247,7 @@ body[data-atmosphere="obsidian"] .atmo-tab.active {
   font-weight: 650;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 h1 {
@@ -1268,7 +1257,7 @@ h1 {
   font-weight: 700;
   letter-spacing: -0.035em;
   line-height: 1.15;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .workspace-intro p {
@@ -1277,7 +1266,7 @@ h1 {
   font-size: 15.5px;
   line-height: 1.5;
   font-weight: 400;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 /* Refined Count Pill */
@@ -1302,7 +1291,7 @@ h1 {
     background var(--ambient-fade-duration) var(--ambient-fade-timing),
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing),
-    color var(--ambient-text-duration) ease;
+    color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .overview-count strong {
@@ -1310,7 +1299,7 @@ h1 {
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.03em;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 body[data-atmosphere="obsidian"] .overview-count {
@@ -1415,7 +1404,7 @@ body[data-atmosphere="obsidian"] .module-sidebar::-webkit-scrollbar-thumb {
   color: var(--label-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .sidebar-heading span:last-child {
@@ -1423,7 +1412,7 @@ body[data-atmosphere="obsidian"] .module-sidebar::-webkit-scrollbar-thumb {
   font-size: 11.5px;
   font-weight: 500;
   white-space: nowrap;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .module-sidebar nav {
@@ -1564,7 +1553,7 @@ body[data-atmosphere="obsidian"] .module-nav-lens::after {
   font-weight: 500;
   text-align: left;
   cursor: pointer;
-  transition: color 0.20s ease, background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing), background var(--ambient-fade-duration) var(--ambient-fade-timing), border-color var(--ambient-fade-duration) var(--ambient-fade-timing), box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
 }
 
 /* Left crystal accent indicator pill for active module */
@@ -1605,8 +1594,7 @@ body[data-atmosphere="obsidian"] .module-link.active::after {
   text-overflow: ellipsis;
   white-space: nowrap;
   display: inline-block;
-  transition: color 0.18s ease;
-  will-change: color;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 /* Typographic Stillness on Hover (Zero Horizontal Jitter) */
@@ -1641,7 +1629,7 @@ body[data-atmosphere="obsidian"] .module-link.active {
   background: rgba(41, 151, 255, 0.18);
   color: #52a9ff;
   border-color: rgba(41, 151, 255, 0.42);
-  box-shadow: 0 2px 10px rgba(41, 151, 255, 0.2);
+  box-shadow: 0 2px 10px rgba(41, 151, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   -webkit-backdrop-filter: var(--glass-blur-subtle);
   backdrop-filter: var(--glass-blur-subtle);
 }
@@ -1660,11 +1648,16 @@ body[data-atmosphere="obsidian"] .module-link.active {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   overflow: visible;
-  transition: margin-top 0.65s var(--apple-spring);
+  transition: transform 0.48s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.header-collapsed .main-panel {
-  margin-top: -72px;
+  transform: translateY(-72px);
+}
+
+/* Peek leaves the canvas mostly in place without crowding the expanded island. */
+body.header-peeking .main-panel {
+  transform: translateY(-48px);
 }
 
 .main-panel::before {
@@ -1684,20 +1677,26 @@ body[data-atmosphere="obsidian"] .main-panel::before {
   font-weight: 500;
   line-height: 1;
   padding-top: 10px;
-  transition: color var(--ambient-text-duration) ease;
+  transition:
+    color var(--ambient-text-duration) var(--ambient-fade-timing),
+    opacity 0.16s ease;
+}
+
+body.header-peeking .breadcrumb {
+  opacity: 0;
 }
 
 .breadcrumb span:last-child {
   color: var(--label-primary);
   font-weight: 600;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .breadcrumb-separator {
   color: var(--label-quaternary);
   font-size: 15px;
   line-height: 1;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .module-heading {
@@ -1715,7 +1714,7 @@ body[data-atmosphere="obsidian"] .main-panel::before {
   letter-spacing: -0.03em;
   color: var(--label-primary);
   line-height: 1.2;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .topic-count {
@@ -1723,7 +1722,7 @@ body[data-atmosphere="obsidian"] .main-panel::before {
   font-size: 13.5px;
   font-weight: 500;
   white-space: nowrap;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .topic-section h3,
@@ -1734,7 +1733,7 @@ body[data-atmosphere="obsidian"] .main-panel::before {
   color: var(--label-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 /* Apple Fluid Adaptive Card Grid */
@@ -1776,8 +1775,8 @@ body[data-atmosphere="obsidian"] .main-panel::before {
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing),
     transform 0.18s var(--apple-spring),
-    color var(--ambient-text-duration) ease;
-  will-change: transform, background, box-shadow;
+    color var(--ambient-text-duration) var(--ambient-fade-timing);
+  will-change: transform;
 }
 
 /* Dynamic Specular Sheen on Cards (Underneath content) */
@@ -1820,10 +1819,11 @@ body[data-atmosphere="obsidian"] .topic-card::after {
     inset 0 1.5px 0 #ffffff,
     inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   transition: 
-    background 0.08s ease-out,
-    border-color 0.08s ease-out,
-    box-shadow 0.14s ease-out,
-    transform 0.18s var(--apple-spring);
+    background var(--ambient-fade-duration) var(--ambient-fade-timing),
+    border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
+    box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing),
+    transform 0.18s var(--apple-spring),
+    color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 body[data-atmosphere="obsidian"] .topic-card {
@@ -1839,7 +1839,11 @@ body[data-atmosphere="obsidian"] .topic-card {
 body[data-atmosphere="obsidian"] .topic-card:hover {
   background: rgba(255, 255, 255, 0.09);
   border-color: rgba(255, 255, 255, 0.22);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 10px 24px -4px rgba(0, 0, 0, 0.58),
+    0 3px 8px -2px rgba(0, 0, 0, 0.36),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.25),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.09);
   transform: translateY(-2px);
 }
 
@@ -1868,13 +1872,18 @@ body[data-atmosphere="obsidian"] .topic-card:hover {
 body[data-atmosphere="obsidian"] .topic-card.selected {
   background: rgba(41, 151, 255, 0.18);
   border-color: rgba(41, 151, 255, 0.45);
-  box-shadow: 0 6px 22px rgba(41, 151, 255, 0.25);
+  box-shadow:
+    0 6px 20px -2px rgba(41, 151, 255, 0.25),
+    0 2px 6px rgba(41, 151, 255, 0.12),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.3);
 }
 
 body[data-atmosphere="obsidian"] .topic-card.selected:hover {
   background: rgba(41, 151, 255, 0.26);
   border-color: rgba(41, 151, 255, 0.55);
-  box-shadow: 0 8px 24px rgba(41, 151, 255, 0.32);
+  box-shadow:
+    0 8px 24px -2px rgba(41, 151, 255, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
   transform: translateY(-2px);
 }
 
@@ -1896,7 +1905,7 @@ body[data-atmosphere="obsidian"] .topic-card.selected:hover {
   transition: 
     background var(--ambient-fade-duration) var(--ambient-fade-timing), 
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing), 
-    color var(--ambient-text-duration) ease, 
+    color var(--ambient-text-duration) var(--ambient-fade-timing),
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
 }
 
@@ -1940,7 +1949,7 @@ body[data-atmosphere="obsidian"] .topic-card.selected .topic-icon {
   font-weight: 550;
   letter-spacing: -0.01em;
   color: var(--label-primary);
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .topic-card.selected .topic-name {
@@ -1956,7 +1965,7 @@ body[data-atmosphere="obsidian"] .topic-card.selected .topic-icon {
   font-size: 18px;
   font-weight: 400;
   line-height: 1;
-  transition: transform 0.2s var(--apple-spring), color var(--ambient-text-duration) ease;
+  transition: transform 0.2s var(--apple-spring), color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .topic-card:hover .topic-chevron,
@@ -1994,7 +2003,169 @@ body[data-atmosphere="obsidian"] .topic-card.selected .topic-icon {
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
+}
+
+.question-list[hidden],
+.source-records[hidden],
+.empty-state[hidden] {
+  display: none;
+}
+
+.question-list {
+  display: grid;
+  gap: 14px;
+}
+
+.question-card,
+.source-records {
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.50);
+  -webkit-backdrop-filter: blur(14px) saturate(180%);
+  backdrop-filter: blur(14px) saturate(180%);
+  border: 1px solid rgba(60, 60, 67, 0.13);
+  box-shadow:
+    0 10px 24px -4px rgba(20, 25, 45, 0.08),
+    0 2px 6px -1px rgba(20, 25, 45, 0.03),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  transition:
+    background var(--ambient-fade-duration) var(--ambient-fade-timing),
+    border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
+    box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
+}
+
+body[data-atmosphere="daylight"] .question-card,
+body[data-atmosphere="daylight"] .source-records {
+  background: rgba(255, 255, 255, 0.52);
+}
+
+body[data-atmosphere="obsidian"] .question-card,
+body[data-atmosphere="obsidian"] .source-records {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 10px 24px -4px rgba(0, 0, 0, 0.5),
+    0 2px 6px -1px rgba(0, 0, 0, 0.28),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.question-card {
+  padding: 18px;
+}
+
+.question-card summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 14px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--label-primary);
+  line-height: 1.6;
+}
+
+.question-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.question-card summary::after {
+  content: '›';
+  color: var(--label-tertiary);
+  font-size: 22px;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform 0.25s var(--apple-spring);
+}
+
+.question-card[open] summary::after {
+  transform: rotate(-90deg);
+}
+
+.question-card summary:focus-visible {
+  outline: 2px solid var(--system-accent);
+  outline-offset: 4px;
+  border-radius: var(--radius-control);
+}
+
+.question-number {
+  color: var(--system-accent);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.question-title {
+  font-size: 15px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.question-answer {
+  padding: 14px 0 0 32px;
+  color: var(--label-secondary);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.question-answer p {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+}
+
+.question-answer p:last-child {
+  margin-bottom: 0;
+}
+
+.source-records {
+  margin-top: 24px;
+  padding: 18px;
+}
+
+.source-records h4 {
+  margin: 0 0 12px;
+  color: var(--label-primary);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.source-records ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.source-records li {
+  padding: 12px 0;
+  border-top: 1px solid var(--separator-color);
+  color: var(--label-secondary);
+  overflow-wrap: anywhere;
+}
+
+.source-company {
+  color: var(--system-accent);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.source-records p {
+  margin: 5px 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.source-records small {
+  color: var(--label-tertiary);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 420px) {
+  .question-answer {
+    padding-left: 0;
+  }
 }
 
 .empty-state {
@@ -2082,7 +2253,7 @@ body[data-atmosphere="obsidian"] .empty-state::before {
     background var(--ambient-fade-duration) var(--ambient-fade-timing), 
     border-color var(--ambient-fade-duration) var(--ambient-fade-timing),
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing),
-    color var(--ambient-text-duration) ease,
+    color var(--ambient-text-duration) var(--ambient-fade-timing),
     transform 0.25s var(--apple-spring);
 }
 
@@ -2112,7 +2283,7 @@ body[data-atmosphere="obsidian"] .empty-icon {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.012em;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 .empty-state p {
@@ -2123,7 +2294,7 @@ body[data-atmosphere="obsidian"] .empty-icon {
   font-size: 13.5px;
   line-height: 1.5;
   max-width: 320px;
-  transition: color var(--ambient-text-duration) ease;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
 /* ==========================================================================
@@ -2176,7 +2347,13 @@ body[data-atmosphere="obsidian"] .empty-icon {
     padding: 14px 18px;
   }
   body.header-collapsed .main-panel {
-    margin-top: 0;
+    transform: none;
+  }
+  body.header-peeking .main-panel {
+    transform: none;
+  }
+  body.header-peeking .breadcrumb {
+    opacity: 1;
   }
   body.header-collapsed .track-switch,
   body.header-collapsed .header-actions {
@@ -2313,56 +2490,55 @@ body[data-atmosphere="obsidian"] .empty-icon {
   position: absolute;
   top: 0;
   left: 0;
-  width: 260px;
-  height: 260px;
+  width: 520px;
+  height: 520px;
   border-radius: 50%;
   pointer-events: none;
   opacity: 0;
-  transform: translate3d(-9999px, -9999px, 0) scale(0.1);
+  transform: translate3d(-9999px, -9999px, 0) scale(0.2);
   will-change: transform, opacity;
-  z-index: 2; /* Positioned directly behind glass cards, illuminating the spatial field */
-  filter: blur(55px); /* Optical crystal Gaussian dispersion: borderless, silky smooth atmospheric vapor */
+  z-index: 2; /* Positioned behind glass cards, illuminating the focal touchpoint */
+  filter: blur(36px); /* Silky optical diffusion with zero GPU convolution drag */
 }
 
-/* 1. Daylight: Pristine Sunlit Morning Sky - 100% Pure White Luminous Mist */
+/* 1. Daylight: Pristine Sunbeam Plume - Ethereal Morning Light Dissolving in Air */
 .backdrop-mist.mist-daylight {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(255, 255, 255, 0.98) 0%,
-    rgba(255, 255, 255, 0.92) 28%,
-    rgba(255, 255, 255, 0.76) 50%,
-    rgba(255, 255, 255, 0.45) 72%,
-    rgba(255, 255, 255, 0.15) 88%,
-    transparent 100%
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.55) 18%,
+    rgba(255, 255, 255, 0.30) 38%,
+    rgba(255, 255, 255, 0.08) 58%,
+    rgba(255, 255, 255, 0.01) 72%,
+    rgba(255, 255, 255, 0) 82%,
+    rgba(255, 255, 255, 0) 100%
   );
 }
 
-/* 2. Aurora: Serene Ethereal Nordic Light - Soft Ethereal Vapor */
+/* 2. Aurora: Celestial Glacial Vapor - Nordic Boreal Iris Sheen */
 .backdrop-mist.mist-aurora {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(240, 246, 255, 0.98) 0%,
-    rgba(224, 242, 254, 0.90) 28%,
-    rgba(230, 238, 255, 0.72) 50%,
-    rgba(240, 248, 255, 0.40) 72%,
-    rgba(240, 248, 255, 0.12) 88%,
-    transparent 100%
+    rgba(224, 242, 254, 0.75) 0%,
+    rgba(215, 235, 255, 0.55) 18%,
+    rgba(220, 240, 255, 0.28) 38%,
+    rgba(230, 245, 255, 0.07) 58%,
+    rgba(240, 250, 255, 0.01) 72%,
+    rgba(240, 250, 255, 0) 82%,
+    rgba(240, 250, 255, 0) 100%
   );
 }
 
-/* 3. Obsidian: Deep Velvet Midnight Void - Soft Ethereal Vapor */
+/* 3. Obsidian: True Drop of Pure Ink in Water - Soft Deep Midnight Plume */
 .backdrop-mist.mist-obsidian {
   background: radial-gradient(
     circle at 50% 50%,
-    rgba(0, 0, 0, 0.98) 0%,
-    rgba(5, 6, 10, 0.92) 28%,
-    rgba(12, 14, 20, 0.75) 50%,
-    rgba(18, 20, 28, 0.42) 72%,
-    rgba(20, 22, 30, 0.15) 88%,
-    transparent 100%
+    rgba(8, 10, 16, 0.78) 0%,
+    rgba(14, 20, 32, 0.58) 18%,
+    rgba(22, 32, 50, 0.32) 38%,
+    rgba(30, 42, 68, 0.09) 58%,
+    rgba(34, 46, 72, 0.01) 72%,
+    rgba(34, 46, 72, 0) 82%,
+    rgba(34, 46, 72, 0) 100%
   );
 }
-
-
-
-

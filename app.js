@@ -33,7 +33,100 @@ const tracks = {
 };
 
 const state = { track: 'backend', moduleIndex: 0, topicIndex: null };
+let questionBank = { version: 1, topics: [] };
+let questionBankError = false;
 const $ = (id) => document.getElementById(id);
+
+function mergeQuestionTopics() {
+  questionBank.topics.forEach(({ track, module, topic }) => {
+    const destination = tracks[track];
+    if (!destination) return;
+    let group = destination.modules.find((item) => item.name === module);
+    if (!group) {
+      group = { name: module, topics: [] };
+      destination.modules.push(group);
+    }
+    if (!group.topics.includes(topic)) group.topics.push(topic);
+  });
+}
+
+function renderQuestionPanel(module, selectedTopic) {
+  const entry = questionBank.topics.find((item) =>
+    item.track === state.track && item.module === module.name && item.topic === selectedTopic
+  );
+  const questions = entry?.questions || [];
+  const list = $('question-list');
+  const sources = $('source-records');
+  const sourceList = $('source-list');
+  const empty = document.querySelector('.empty-state');
+  list.replaceChildren();
+  sourceList.replaceChildren();
+  document.querySelector('.question-count').textContent = `${questions.length} 道题`;
+  empty.hidden = questions.length > 0;
+  list.hidden = questions.length === 0;
+  sources.hidden = questions.length === 0;
+
+  if (!questions.length) {
+    $('empty-title').textContent = questionBankError ? '题库加载失败' : selectedTopic ? `${selectedTopic}还没有题目` : '还没有题目';
+    $('empty-description').textContent = questionBankError
+      ? '请刷新页面重试。'
+      : selectedTopic ? '这个方向的复习内容会显示在这里。' : '选择一个复习方向，之后可在这里查看题目。';
+    return;
+  }
+
+  questions.forEach((item, index) => {
+    const card = document.createElement('details');
+    card.className = 'question-card';
+    const heading = document.createElement('summary');
+    const number = document.createElement('span');
+    number.className = 'question-number';
+    number.textContent = String(index + 1).padStart(2, '0');
+    const title = document.createElement('span');
+    title.className = 'question-title';
+    title.textContent = item.question;
+    heading.append(number, title);
+    card.append(heading);
+    const answer = document.createElement('div');
+    answer.className = 'question-answer';
+    item.answer.forEach((paragraph) => {
+      const p = document.createElement('p');
+      p.textContent = paragraph;
+      answer.append(p);
+    });
+    card.append(answer);
+    list.append(card);
+
+    item.sources.forEach((source) => {
+      const row = document.createElement('li');
+      const company = document.createElement('span');
+      company.className = 'source-company';
+      company.textContent = source.company;
+      const original = document.createElement('p');
+      original.textContent = source.original;
+      const canonical = document.createElement('small');
+      canonical.textContent = `对应：${item.question}`;
+      row.append(company, original, canonical);
+      sourceList.append(row);
+    });
+  });
+}
+
+async function loadQuestionBank() {
+  try {
+    const response = await fetch('./data/questions.json', { cache: 'no-cache' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    if (data.version !== 1 || !Array.isArray(data.topics)) throw new Error('题库格式无效');
+    questionBank = data;
+    mergeQuestionTopics();
+    render();
+  } catch (error) {
+    console.error('题库加载失败', error);
+    questionBankError = true;
+    renderQuestionPanel(tracks[state.track].modules[state.moduleIndex],
+      state.topicIndex === null ? null : tracks[state.track].modules[state.moduleIndex].topics[state.topicIndex]);
+  }
+}
 
 function setTrack(track) {
   if (!tracks[track]) return;
@@ -121,8 +214,7 @@ function render() {
 
   const selectedTopic = state.topicIndex === null ? null : module.topics[state.topicIndex];
   $('question-heading').textContent = selectedTopic || '题目';
-  $('empty-title').textContent = selectedTopic ? `${selectedTopic}还没有题目` : '还没有题目';
-  $('empty-description').textContent = selectedTopic ? '这个方向的复习内容会显示在这里。' : '选择一个复习方向，之后可在这里查看题目。';
+  renderQuestionPanel(module, selectedTopic);
 }
 
 document.querySelectorAll('.track-tab').forEach((tab) => {
@@ -223,6 +315,7 @@ function initLiquidSpecular() {
 // Apple Liquid Glass Atmosphere Environment Mode Switcher & Dynamic Parallax
 // ==========================================================================
 function setAtmosphere(mode) {
+  if (!['aurora', 'daylight', 'obsidian'].includes(mode)) return false;
   document.body.dataset.atmosphere = mode;
   const atmoSwitch = document.querySelector('.atmosphere-switch');
   if (atmoSwitch) {
@@ -230,35 +323,102 @@ function setAtmosphere(mode) {
   }
   document.querySelectorAll('.atmo-tab').forEach((tab) => {
     tab.classList.toggle('active', tab.dataset.atmo === mode);
+    tab.setAttribute('aria-pressed', String(tab.dataset.atmo === mode));
   });
   const themeColorMeta = document.querySelector('meta[name="theme-color"]');
   if (themeColorMeta) {
     themeColorMeta.setAttribute('content', mode === 'obsidian' ? '#000000' : '#ffffff');
   }
+  return true;
 }
 
+const atmosphereModes = new Set(['aurora', 'daylight', 'obsidian']);
+const atmosphereMotionQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)') || null;
+let prefersReducedMotion = Boolean(atmosphereMotionQuery?.matches);
 let currentMistAnim = null;
+let currentMistKind = null;
 
-function triggerAmbientMistDiffusion(x, y, targetMode) {
-  const mist = $('backdrop-mist');
+function resetMist(mist) {
   if (!mist) return;
+  mist.className = 'backdrop-mist';
+  mist.style.removeProperty('left');
+  mist.style.removeProperty('top');
+  mist.style.removeProperty('opacity');
+  mist.style.removeProperty('transform');
+}
 
+function finishMistAnimation(animation, mist) {
+  if (currentMistAnim !== animation) return;
+  currentMistAnim = null;
+  currentMistKind = null;
+  try {
+    animation.cancel();
+  } catch (_) {}
+  resetMist(mist);
+}
+
+function retireCurrentMist() {
+  if (!currentMistAnim || currentMistKind !== 'plume') return false;
+
+  const animation = currentMistAnim;
+  const mist = $('backdrop-mist');
+  if (!mist) return false;
+
+  let opacity;
+  try {
+    // Preserve the currently composited frame before replacing the plume with a short fade.
+    animation.commitStyles();
+    opacity = Number.parseFloat(mist.style.opacity) || 0;
+    animation.cancel();
+  } catch (_) {
+    // Keep the in-flight effect alive if commitStyles is unavailable; its own fade still ends cleanly.
+    currentMistKind = 'retire';
+    return true;
+  }
+
+  currentMistAnim = null;
+  currentMistKind = null;
+  try {
+    currentMistAnim = mist.animate([
+      { opacity },
+      { opacity: 0 }
+    ], {
+      duration: 120,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      fill: 'forwards'
+    });
+    currentMistKind = 'retire';
+    const retireAnimation = currentMistAnim;
+    retireAnimation.onfinish = () => finishMistAnimation(retireAnimation, mist);
+    return true;
+  } catch (_) {
+    // Do not leave a committed, visible plume behind if the fade cannot be started.
+    resetMist(mist);
+    return false;
+  }
+}
+
+function clearMistAnimation() {
+  const mist = $('backdrop-mist');
   if (currentMistAnim) {
     try {
       currentMistAnim.cancel();
     } catch (_) {}
-    currentMistAnim = null;
   }
+  currentMistAnim = null;
+  currentMistKind = null;
+  resetMist(mist);
+}
 
-  // Calculate maximum distance to the 4 viewport corners to guarantee full coverage
-  const maxDist = Math.hypot(
-    Math.max(x, window.innerWidth - x),
-    Math.max(y, window.innerHeight - y)
-  );
+function triggerAmbientMistDiffusion(x, y, targetMode) {
+  const mist = $('backdrop-mist');
+  if (!mist || prefersReducedMotion || !atmosphereModes.has(targetMode) || typeof mist.animate !== 'function') return;
 
-  // The base mist element has a radius of 130px (260px diameter).
-  // Target scale covers maxDist with a 45% margin to ensure the soft Gaussian falloff envelops corners.
-  const targetScale = Math.max(22, Math.ceil((maxDist * 1.45) / 130));
+  // Do not stack plumes. An interrupted plume keeps its current frame and fades out in 120ms.
+  if (currentMistAnim) {
+    retireCurrentMist();
+    return;
+  }
 
   mist.className = `backdrop-mist mist-${targetMode}`;
   mist.style.left = `${x.toFixed(1)}px`;
@@ -266,57 +426,49 @@ function triggerAmbientMistDiffusion(x, y, targetMode) {
 
   currentMistAnim = mist.animate([
     {
-      // 0.00s: Gathers right at the clicked button touchpoint
-      transform: 'translate3d(-50%, -50%, 0) scale(0.06)',
-      opacity: 0
+      transform: 'translate3d(-50%, -50%, 0) scale(0.18)',
+      opacity: 0,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
     },
     {
-      // 0.18s (8%): Bursts into a prominent luminous mist nucleus right at the button
-      transform: `translate3d(-50%, -50%, 0) scale(${Math.max(1, Math.round(targetScale * 0.12))})`,
-      opacity: 0.98,
-      offset: 0.08
+      // The plume reaches its restrained peak at about 120ms, independent of the later easing.
+      transform: 'translate3d(-50%, -50%, 0) scale(0.9)',
+      opacity: 0.55,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      offset: 0.18
     },
     {
-      // 0.66s (30%): Sweeps smoothly across the top bar and upper workspace
-      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 0.40)})`,
-      opacity: 0.95,
-      offset: 0.30
+      transform: 'translate3d(-50%, -50%, 0) scale(1.4)',
+      opacity: 0.24,
+      easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      offset: 0.55
     },
     {
-      // 1.32s (60%): Rolls majestically across the main cards and sidebar
-      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 0.75)})`,
-      opacity: 0.88,
-      offset: 0.60
-    },
-    {
-      // 1.80s (82%): Envelops all corners of the entire screen completely
-      transform: `translate3d(-50%, -50%, 0) scale(${targetScale})`,
-      opacity: 0.60,
-      offset: 0.82
-    },
-    {
-      // 2.20s (100%): Seamlessly melts into the final atmosphere
-      transform: `translate3d(-50%, -50%, 0) scale(${Math.round(targetScale * 1.18)})`,
+      transform: 'translate3d(-50%, -50%, 0) scale(1.85)',
       opacity: 0,
       offset: 1.0
     }
   ], {
-    duration: 2200,
-    easing: 'cubic-bezier(0.22, 0.65, 0.35, 1)',
+    duration: 650,
+    easing: 'linear',
     fill: 'forwards'
   });
-
-  currentMistAnim.onfinish = () => {
-    mist.style.opacity = '0';
-    mist.style.transform = 'translate3d(-9999px, -9999px, 0) scale(0.1)';
-    mist.className = 'backdrop-mist';
-    currentMistAnim = null;
-  };
+  currentMistKind = 'plume';
+  const plumeAnimation = currentMistAnim;
+  plumeAnimation.onfinish = () => finishMistAnimation(plumeAnimation, mist);
 }
 
 function initAtmosphere() {
   const urlAtmo = urlParams.get('atmo');
-  const saved = urlAtmo || localStorage.getItem('bagu-atmosphere') || 'aurora';
+  let saved = 'aurora';
+  if (atmosphereModes.has(urlAtmo)) {
+    saved = urlAtmo;
+  } else {
+    try {
+      const stored = localStorage.getItem('bagu-atmosphere');
+      if (atmosphereModes.has(stored)) saved = stored;
+    } catch (_) {}
+  }
   
   // Suppress transitions on initial load to prevent flashing
   document.body.classList.add('no-transition');
@@ -327,34 +479,51 @@ function initAtmosphere() {
     });
   });
 
+  const handleMotionPreferenceChange = (event) => {
+    prefersReducedMotion = event.matches;
+    if (prefersReducedMotion) clearMistAnimation();
+  };
+  if (atmosphereMotionQuery?.addEventListener) {
+    atmosphereMotionQuery.addEventListener('change', handleMotionPreferenceChange);
+  } else {
+    atmosphereMotionQuery?.addListener?.(handleMotionPreferenceChange);
+  }
+
+  let atmosphereFrame = null;
+  let pendingAtmosphere = null;
+
   document.querySelectorAll('.atmo-tab').forEach((tab) => {
     tab.addEventListener('click', (event) => {
       const mode = tab.dataset.atmo;
-      if (document.body.dataset.atmosphere === mode) return;
+      if (!atmosphereModes.has(mode)) return;
+      const previousIntent = pendingAtmosphere?.mode ?? document.body.dataset.atmosphere;
+      if (previousIntent === mode) return;
 
       const rect = tab.getBoundingClientRect();
       const x = (event.clientX && event.clientX > 0) ? event.clientX : (rect.left + rect.width / 2);
       const y = (event.clientY && event.clientY > 0) ? event.clientY : (rect.top + rect.height / 2);
 
-      // Tactile button micro-spring feedback via Web Animations API (zero layout reflow)
-      try {
-        tab.animate([
-          { transform: 'scale(1)' },
-          { transform: 'scale(1.08)', offset: 0.35 },
-          { transform: 'scale(1)' }
-        ], {
-          duration: 480,
-          easing: 'cubic-bezier(0.16, 1, 0.3, 1)'
-        });
-      } catch (_) {}
-
-      // Single continuous harmonious wave:
-      // Launch mist from button and synchronously transition atmosphere in unified 2.2s S-curve
-      triggerAmbientMistDiffusion(x, y, mode);
-      setAtmosphere(mode);
-      try {
-        localStorage.setItem('bagu-atmosphere', mode);
-      } catch (_) {}
+      // Coalesce clicks within a frame so the latest requested mode wins, including A → B → A.
+      pendingAtmosphere = { mode, x, y };
+      if (atmosphereFrame !== null) return;
+      atmosphereFrame = requestAnimationFrame(() => {
+        atmosphereFrame = null;
+        const intent = pendingAtmosphere;
+        pendingAtmosphere = null;
+        if (!intent || !atmosphereModes.has(intent.mode)) return;
+        if (intent.mode !== document.body.dataset.atmosphere) {
+          try {
+            triggerAmbientMistDiffusion(intent.x, intent.y, intent.mode);
+          } catch (_) {
+            // Decorative animation failures must never prevent the selected theme from applying.
+            clearMistAnimation();
+          }
+        }
+        if (!setAtmosphere(intent.mode)) return;
+        try {
+          localStorage.setItem('bagu-atmosphere', intent.mode);
+        } catch (_) {}
+      });
     });
   });
 }
@@ -641,6 +810,7 @@ function initModuleNavHoverTracker() {
 }
 
 render();
+loadQuestionBank();
 initLiquidSpecular();
 initAtmosphere();
 initHeaderCollapse();
@@ -678,4 +848,3 @@ if (urlParams.get('hover-header') === 'true') {
   const headerInner = document.querySelector('.header-inner');
   if (headerInner) headerInner.classList.add('pseudo-hover');
 }
-
