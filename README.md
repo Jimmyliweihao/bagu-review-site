@@ -4,7 +4,7 @@ Java 后端与 Agent 八股复习框架。网站为纯静态 HTML、CSS、JavaSc
 
 本地预览：在本目录运行 `python3 -m http.server 8765`。
 
-题库数据位于 `data/questions.json`。按 `track → module → topic` 组织规范化问答；每题的 `sources` 保留原题与公司。新增模块或方向写入数据后会自动出现在页面导航中。
+题库数据位于 `data/questions.json`。按 `track → module → topic` 组织规范化问答；每题的 `sources` 保留原题与公司。后端大类固定在 `app.js` 中；在已有大类下写入新方向后，该方向会自动出现在页面导航中。未选中方向时，页面按方向顺序显示该大类的全部题目。
 
 ## 设计系统与工程规范
 本项目遵循 **Apple Liquid Glass 空间计算设计系统**。详细规范与设计规则参见 [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) 与 [AGENTS.md](./AGENTS.md)。

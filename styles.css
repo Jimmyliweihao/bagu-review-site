@@ -1699,22 +1699,17 @@ body.header-peeking .breadcrumb {
   transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
 }
 
-.module-heading {
+.topic-section {
+  margin-top: 32px;
+}
+
+.topic-section-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 16px;
-  margin: 18px 0 28px;
-}
-
-.module-heading h2 {
-  margin: 0;
-  font-size: clamp(26px, 2.6vw, 36px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--label-primary);
-  line-height: 1.2;
-  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 0 2px;
 }
 
 .topic-count {
@@ -1734,6 +1729,10 @@ body.header-peeking .breadcrumb {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
+}
+
+.topic-section-head h3 {
+  margin: 0;
 }
 
 /* Apple Fluid Adaptive Card Grid */
@@ -2007,7 +2006,6 @@ body[data-atmosphere="obsidian"] .topic-card.selected .topic-icon {
 }
 
 .question-list[hidden],
-.source-records[hidden],
 .empty-state[hidden] {
   display: none;
 }
@@ -2017,8 +2015,20 @@ body[data-atmosphere="obsidian"] .topic-card.selected .topic-icon {
   gap: 14px;
 }
 
-.question-card,
-.source-records {
+.question-group-heading {
+  margin: 4px 0 -2px 2px;
+  color: var(--label-tertiary);
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.4;
+  transition: color var(--ambient-text-duration) var(--ambient-fade-timing);
+}
+
+.question-group-heading:not(:first-child) {
+  margin-top: 18px;
+}
+
+.question-card {
   border-radius: var(--radius-card);
   background: rgba(255, 255, 255, 0.50);
   -webkit-backdrop-filter: blur(14px) saturate(180%);
@@ -2035,13 +2045,11 @@ body[data-atmosphere="obsidian"] .topic-card.selected .topic-icon {
     box-shadow var(--ambient-fade-duration) var(--ambient-fade-timing);
 }
 
-body[data-atmosphere="daylight"] .question-card,
-body[data-atmosphere="daylight"] .source-records {
+body[data-atmosphere="daylight"] .question-card {
   background: rgba(255, 255, 255, 0.52);
 }
 
-body[data-atmosphere="obsidian"] .question-card,
-body[data-atmosphere="obsidian"] .source-records {
+body[data-atmosphere="obsidian"] .question-card {
   background: rgba(255, 255, 255, 0.045);
   border-color: rgba(255, 255, 255, 0.15);
   box-shadow:
@@ -2118,52 +2126,54 @@ body[data-atmosphere="obsidian"] .source-records {
   margin-bottom: 0;
 }
 
-.source-records {
-  margin-top: 24px;
-  padding: 18px;
+.question-sources {
+  margin-top: 16px;
+  padding: 14px 0 0 32px;
+  border-top: 1px solid var(--separator-color);
 }
 
-.source-records h4 {
-  margin: 0 0 12px;
-  color: var(--label-primary);
-  font-size: 14px;
+.question-sources-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--label-tertiary);
+  font-size: 12px;
   font-weight: 650;
 }
 
-.source-records ol {
+.question-sources ul {
+  display: grid;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.source-records li {
-  padding: 12px 0;
-  border-top: 1px solid var(--separator-color);
+.question-sources li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
   color: var(--label-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.source-original {
+  min-width: 0;
   overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .source-company {
+  flex-shrink: 0;
   color: var(--system-accent);
   font-size: 12px;
   font-weight: 650;
 }
 
-.source-records p {
-  margin: 5px 0;
-  font-size: 13.5px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-
-.source-records small {
-  color: var(--label-tertiary);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
 @media (max-width: 420px) {
-  .question-answer {
+  .question-answer,
+  .question-sources {
     padding-left: 0;
   }
 }
@@ -2420,9 +2430,6 @@ body[data-atmosphere="obsidian"] .empty-icon {
     padding: 24px 18px 28px;
     overflow: hidden;
   }
-  .module-heading {
-    margin: 16px 0 24px;
-  }
 }
 
 @media (max-width: 420px) {
@@ -2431,13 +2438,6 @@ body[data-atmosphere="obsidian"] .empty-icon {
   }
   .workspace-intro p {
     font-size: 14px;
-  }
-  .module-heading {
-    display: block;
-  }
-  .topic-count {
-    display: inline-block;
-    margin-top: 6px;
   }
   .main-panel {
     padding: 20px 14px;

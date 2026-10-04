@@ -4,14 +4,17 @@ const tracks = {
     sidebarLabel: 'Java 后端',
     breadcrumb: '后端八股',
     modules: [
-      { name: 'Java 基础', topics: ['语言特性', '泛型与反射', '异常与 IO'] },
-      { name: '集合与并发', topics: ['集合框架', '线程与线程池', '锁与并发工具'] },
+      { name: 'Java基础', topics: ['语言特性', '泛型与反射', '异常与 IO'] },
+      { name: 'Java集合', topics: ['集合框架', 'List 与 Set', 'Map'] },
+      { name: 'JUC', topics: ['并发容器', '原子类与锁', '线程池'] },
       { name: 'JVM', topics: ['内存模型', '垃圾回收', '类加载与调优'] },
-      { name: 'Spring 生态', topics: ['Spring 核心', 'Spring Boot', 'Spring Cloud'] },
-      { name: '数据存储', topics: ['MySQL', 'Redis', 'Elasticsearch'] },
-      { name: '中间件', topics: ['消息队列', '任务调度', '分布式协调'] },
+      { name: 'Spring', topics: ['Spring 核心', 'Spring Boot', 'Spring Cloud'] },
+      { name: 'MySQL', topics: ['索引与查询', '事务与锁', '架构与调优'] },
+      { name: 'redis', topics: ['数据结构与缓存', '高可用与容灾', '持久化与集群'] },
+      { name: '消息队列', topics: ['消息模型', '可靠性', '积压与消费'] },
+      { name: '中间件', topics: ['Elasticsearch', '任务调度', '分布式协调'] },
+      { name: '场景题', topics: ['秒杀与库存', '分布式系统', '高可用与性能', '安全与稳定性'] },
       { name: '计算机基础', topics: ['网络协议', '操作系统', '数据结构与算法'] },
-      { name: '系统设计', topics: ['分布式系统', '高可用与性能', '安全与稳定性'] },
     ],
   },
   agent: {
@@ -43,6 +46,7 @@ function mergeQuestionTopics() {
     if (!destination) return;
     let group = destination.modules.find((item) => item.name === module);
     if (!group) {
+      if (track === 'backend') return;
       group = { name: module, topics: [] };
       destination.modules.push(group);
     }
@@ -51,62 +55,77 @@ function mergeQuestionTopics() {
 }
 
 function renderQuestionPanel(module, selectedTopic) {
-  const entry = questionBank.topics.find((item) =>
-    item.track === state.track && item.module === module.name && item.topic === selectedTopic
-  );
-  const questions = entry?.questions || [];
+  const visibleTopics = selectedTopic === null ? module.topics : [selectedTopic];
+  const groups = visibleTopics.map((topic) => ({
+    topic,
+    questions: questionBank.topics.find((item) =>
+      item.track === state.track && item.module === module.name && item.topic === topic
+    )?.questions || [],
+  })).filter((group) => group.questions.length > 0);
+  const total = groups.reduce((count, group) => count + group.questions.length, 0);
   const list = $('question-list');
-  const sources = $('source-records');
-  const sourceList = $('source-list');
   const empty = document.querySelector('.empty-state');
   list.replaceChildren();
-  sourceList.replaceChildren();
-  document.querySelector('.question-count').textContent = `${questions.length} 道题`;
-  empty.hidden = questions.length > 0;
-  list.hidden = questions.length === 0;
-  sources.hidden = questions.length === 0;
+  document.querySelector('.question-count').textContent = `${total} 道题`;
+  empty.hidden = total > 0;
+  list.hidden = total === 0;
 
-  if (!questions.length) {
+  if (!total) {
     $('empty-title').textContent = questionBankError ? '题库加载失败' : selectedTopic ? `${selectedTopic}还没有题目` : '还没有题目';
     $('empty-description').textContent = questionBankError
       ? '请刷新页面重试。'
-      : selectedTopic ? '这个方向的复习内容会显示在这里。' : '选择一个复习方向，之后可在这里查看题目。';
+      : selectedTopic ? '这个方向还没有复习内容。' : '这个大类还没有题目。';
     return;
   }
 
-  questions.forEach((item, index) => {
-    const card = document.createElement('details');
-    card.className = 'question-card';
-    const heading = document.createElement('summary');
-    const number = document.createElement('span');
-    number.className = 'question-number';
-    number.textContent = String(index + 1).padStart(2, '0');
-    const title = document.createElement('span');
-    title.className = 'question-title';
-    title.textContent = item.question;
-    heading.append(number, title);
-    card.append(heading);
-    const answer = document.createElement('div');
-    answer.className = 'question-answer';
-    item.answer.forEach((paragraph) => {
-      const p = document.createElement('p');
-      p.textContent = paragraph;
-      answer.append(p);
-    });
-    card.append(answer);
-    list.append(card);
-
-    item.sources.forEach((source) => {
-      const row = document.createElement('li');
-      const company = document.createElement('span');
-      company.className = 'source-company';
-      company.textContent = source.company;
-      const original = document.createElement('p');
-      original.textContent = source.original;
-      const canonical = document.createElement('small');
-      canonical.textContent = `对应：${item.question}`;
-      row.append(company, original, canonical);
-      sourceList.append(row);
+  let questionNumber = 0;
+  groups.forEach(({ topic, questions }) => {
+    if (selectedTopic === null) {
+      const groupHeading = document.createElement('h4');
+      groupHeading.className = 'question-group-heading';
+      groupHeading.textContent = topic;
+      list.append(groupHeading);
+    }
+    questions.forEach((item) => {
+      const card = document.createElement('details');
+      card.className = 'question-card';
+      const heading = document.createElement('summary');
+      const number = document.createElement('span');
+      number.className = 'question-number';
+      number.textContent = String(++questionNumber).padStart(2, '0');
+      const title = document.createElement('span');
+      title.className = 'question-title';
+      title.textContent = item.question;
+      heading.append(number, title);
+      card.append(heading);
+      const answer = document.createElement('div');
+      answer.className = 'question-answer';
+      item.answer.forEach((paragraph) => {
+        const p = document.createElement('p');
+        p.textContent = paragraph;
+        answer.append(p);
+      });
+      card.append(answer);
+      const sourceSection = document.createElement('div');
+      sourceSection.className = 'question-sources';
+      const sourceLabel = document.createElement('span');
+      sourceLabel.className = 'question-sources-label';
+      sourceLabel.textContent = '题源';
+      const sourceList = document.createElement('ul');
+      item.sources.forEach((source) => {
+        const row = document.createElement('li');
+        const original = document.createElement('span');
+        original.className = 'source-original';
+        original.textContent = source.original;
+        const company = document.createElement('span');
+        company.className = 'source-company';
+        company.textContent = source.company;
+        row.append(original, company);
+        sourceList.append(row);
+      });
+      sourceSection.append(sourceLabel, sourceList);
+      card.append(sourceSection);
+      list.append(card);
     });
   });
 }
@@ -145,9 +164,9 @@ function selectModule(index) {
 }
 
 function selectTopic(index) {
-  state.topicIndex = index;
+  state.topicIndex = state.topicIndex === index ? null : index;
   render();
-  document.querySelector('.topic-card.selected')?.focus();
+  document.querySelectorAll('.topic-card')[index]?.focus();
 }
 
 function render() {
@@ -178,7 +197,6 @@ function render() {
   if (sidebarTrackLabel) sidebarTrackLabel.textContent = track.sidebarLabel;
   $('breadcrumb-track').textContent = track.breadcrumb;
   $('breadcrumb-module').textContent = module.name;
-  $('module-title').textContent = module.name;
   $('module-topic-count').textContent = `${module.topics.length} 个方向`;
 
   const nav = $('module-nav');
