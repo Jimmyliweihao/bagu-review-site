@@ -127,6 +127,11 @@ body[data-atmosphere="obsidian"] {
   box-sizing: border-box;
 }
 
+html {
+  /* Keep centered glass islands fixed when an answer adds the page scrollbar. */
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   min-width: 320px;
