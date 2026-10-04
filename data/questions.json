@@ -1,4 +1,234 @@
 {
   "version": 1,
-  "topics": []
+  "topics": [
+    {
+      "track": "backend",
+      "module": "系统设计",
+      "topic": "秒杀与库存",
+      "questions": [
+        {
+          "id": "seckill-system-design",
+          "question": "如何设计高并发商城秒杀系统？",
+          "answer": [
+            "先明确库存不超卖、用户限购、订单状态可追踪等目标。把商品展示流量与下单流量分开：页面静态化和缓存减轻读取压力；入口做活动资格校验、限流、排队和请求幂等，防止峰值流量直接打到数据库。",
+            "活动前预热可售库存；下单入口用原子校验与预扣减快速拦截无货请求，再通过消息队列削峰并异步创建订单。订单落库仍需数据库条件扣减或等价的事务约束，以及用户与活动维度的唯一约束；预扣成功只表示获得处理资格，不等于订单成功。",
+            "用订单状态机处理支付、超时关单和库存回补；消费者、回补和重试都要幂等。对 Redis、消息队列和数据库之间的失败窗口做补偿与对账，监控库存差异、排队时长和下单成功率，并准备限流与降级方案。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "商城秒杀场景怎么设计"
+            }
+          ]
+        },
+        {
+          "id": "prevent-inventory-oversell",
+          "question": "高并发扣减库存时如何防止超卖？",
+          "answer": [
+            "关键是让检查库存和扣减成为一个原子操作，不能先查库存再无条件更新。以 MySQL 为例，可执行 UPDATE stock SET available = available - 1 WHERE sku_id = ? AND available > 0，并以受影响行数判断是否抢到库存；订单写入与库存扣减放在同一数据库事务中。",
+            "Redis 原子预扣减可在入口削峰，但它与后续消息、数据库事务不是同一个原子操作；最终落库仍要校验库存，并对创建订单失败、支付超时等情况做幂等回补和定期对账。用户限购还要使用订单唯一约束或等价的原子校验，防止重复下单。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "怎么防止超卖"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "track": "backend",
+      "module": "数据存储",
+      "topic": "Redis",
+      "questions": [
+        {
+          "id": "redis-outage-business-continuity",
+          "question": "Redis 宕机时如何降低对业务的影响？",
+          "answer": [
+            "先区分 Redis 的角色。如果它只是缓存，客户端应设置短超时、连接池上限和熔断；缓存不可用时可回源权威数据库，但必须配合限流、热点本地缓存或请求合并，避免全部流量同时压垮数据库。恢复后分批预热缓存，不要瞬间重建所有热点键。",
+            "部署层面可通过副本与 Sentinel 或 Redis Cluster 的故障转移缩短不可用时间，并让客户端正确发现新主节点、重连和监控切换。故障转移仍有时间窗口，不能当作零中断保证。",
+            "如果 Redis 承载库存、分布式锁等关键状态，不能简单绕过它继续写入；应按一致性要求暂停相关写操作，或切换到事先设计好的权威事务存储与降级流程。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "redis宕机怎么防止影响到业务"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "track": "backend",
+      "module": "中间件",
+      "topic": "消息队列",
+      "questions": [
+        {
+          "id": "message-queue-reliability",
+          "question": "如何保证消息队列从生产到消费的可靠性？",
+          "answer": [
+            "按生产者、Broker、消费者三段排查丢失风险。生产者需要确认 Broker 已接收并处理发送失败；如果业务数据库写入与发消息必须一致，可使用事务消息或本地消息表（Outbox）加重试。Broker 侧按产品能力配置持久化、复制和故障转移，并监控不可路由消息。",
+            "消费者应在业务事务成功后再确认消息；处理失败时有限次重试，持续失败进入死信队列并告警。因为确认超时或重试会导致重复投递，消费逻辑要通过业务唯一键、去重记录或数据库约束实现幂等。",
+            "例如 RabbitMQ 的发布确认只覆盖生产者到 Broker 的责任转移，不代表消费者处理成功；消费者确认又是另一环。通常把端到端目标设计为至少一次投递加幂等处理，不轻易承诺端到端恰好一次。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "消息队列的可靠性"
+            }
+          ]
+        },
+        {
+          "id": "message-queue-backlog",
+          "question": "消息队列出现大量积压时如何定位和处理？",
+          "answer": [
+            "先看生产速率、消费速率、待消费与未确认数量，以及消费者错误、下游数据库延迟和 Broker 磁盘/网络指标。若消费速率持续不高于生产速率，积压不会自行消失；应先找出慢消费者、毒消息或流量突增的原因。",
+            "短期可限流或暂停非关键生产者，修复失败消费并把反复失败的消息转入死信队列；在队列分区数、顺序要求和下游容量允许时扩容消费者，优化批处理与预取配置。扩容前确认瓶颈不在数据库，否则只会把压力后移。",
+            "恢复后按业务优先级回放、保持幂等并观察堆积下降速度；容量规划要同时评估消息保留时间、磁盘空间和峰值处理能力。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "消息队列挤压问题"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "track": "backend",
+      "module": "集合与并发",
+      "topic": "集合框架",
+      "questions": [
+        {
+          "id": "concurrent-hash-map-safety",
+          "question": "ConcurrentHashMap 如何保证线程安全，使用时有哪些注意点？",
+          "answer": [
+            "ConcurrentHashMap 提供并发访问下的线程安全映射。在 JDK 8 及以后常见实现中，读取通常不锁住整张表；空桶写入使用 CAS，发生冲突时对桶内结构进行更细粒度的同步，节点与表的可见性由并发内存语义保证。具体实现细节随 JDK 版本可能变化。",
+            "它不允许 null 键或 null 值，遍历器是弱一致性的。单次 put、putIfAbsent、compute 等操作可按其 API 语义保证原子性，但先 get 再 put 的组合不是原子操作；需要复合更新时使用 compute、merge 等原子方法，而不是自行拆成多个步骤。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "ConcurrentHashMap"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "track": "backend",
+      "module": "集合与并发",
+      "topic": "锁与并发工具",
+      "questions": [
+        {
+          "id": "cas-principle-limitations",
+          "question": "CAS 的原理、优点和常见问题是什么？",
+          "answer": [
+            "CAS（Compare-And-Set）把当前值与期望值比较：相等时原子地写入新值，否则失败并由调用方决定是否重试。Java 的 AtomicInteger 等原子类提供 compareAndSet；它适合短小的共享状态更新，可避免线程进入互斥锁的阻塞等待。",
+            "常见问题是高竞争下反复重试消耗 CPU、值经历 A→B→A 的 ABA 问题，以及单次 CAS 只能直接保护其目标变量，不能让一组普通操作自动成为事务。ABA 可按场景附加版本号，例如 AtomicStampedReference；多字段不变量可使用锁或其他一致性机制。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "CAS"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "track": "backend",
+      "module": "集合与并发",
+      "topic": "线程与线程池",
+      "questions": [
+        {
+          "id": "java-thread-pool-creation",
+          "question": "Java 中有哪些常见的线程池创建方式？",
+          "answer": [
+            "常用方式是通过 Executors 工厂创建固定大小池、按需扩张池、单线程池和定时任务池，或直接构造 ThreadPoolExecutor 指定线程数、队列、线程工厂与拒绝策略。工作窃取任务也可考虑 ForkJoinPool 或 Executors.newWorkStealingPool。",
+            "工厂方法适合了解常见配置，但不能只凭名称选择：newFixedThreadPool 和 newSingleThreadExecutor 使用无界队列，newCachedThreadPool 可按任务压力创建大量线程。面向持续高负载的业务，应显式评估线程数、队列容量、超时、拒绝与监控，避免无限堆积。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "线程池创建的方式"
+            }
+          ]
+        },
+        {
+          "id": "thread-pool-parameters",
+          "question": "自定义 ThreadPoolExecutor 有哪些核心参数，任务如何调度？",
+          "answer": [
+            "构造时主要配置 corePoolSize、maximumPoolSize、keepAliveTime 与时间单位、workQueue、threadFactory、RejectedExecutionHandler。核心线程数决定优先创建的工作线程数；最大线程数限制扩容上限；空闲超时通常回收超过核心数的线程。",
+            "提交任务时，运行线程少于核心数则先创建线程；达到核心数后优先尝试入队；队列放不下才在最大线程数内继续建线程；仍无法接纳时触发拒绝策略。直接移交队列、有界队列和无界队列会显著改变扩容行为，例如无界队列通常使最大线程数不起作用。",
+            "参数应结合 CPU 或 I/O 等待比例、任务耗时、峰值到达速率及延迟目标压测确定，并监控活跃线程、队列长度、拒绝数与任务耗时。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "自定义线程池的参数"
+            }
+          ]
+        },
+        {
+          "id": "thread-pool-rejection-policies",
+          "question": "ThreadPoolExecutor 有哪些拒绝策略，如何选择？",
+          "answer": [
+            "线程池关闭，或线程数与有界队列都已达到容量时会拒绝新任务。内置的 AbortPolicy 抛出 RejectedExecutionException；CallerRunsPolicy 在提交任务的线程中执行以形成反压，但线程池已关闭时不会执行；DiscardPolicy 静默丢弃；DiscardOldestPolicy 丢弃队列头部任务后重试提交。",
+            "重要任务通常不应静默丢弃。可选择显式抛错让上层限流或降级，或实现自定义策略记录并补偿；CallerRunsPolicy 会拖慢提交线程，需要确认它不是不能阻塞的事件线程。选择策略时同时考虑任务是否允许丢失、顺序要求及上游承压能力。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "线程池的拒接策略"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "track": "backend",
+      "module": "数据存储",
+      "topic": "缓存设计",
+      "questions": [
+        {
+          "id": "lru-cache-design",
+          "question": "如何设计平均 O(1) 的 LRU 缓存？",
+          "answer": [
+            "用哈希表保存 key 到双向链表节点的映射；链表头代表最近使用，尾部代表最久未使用。get 命中后把节点移到头部；put 更新已有键时同样移到头部，新键则插入头部；容量已满时删除尾节点并同步删除哈希表项。",
+            "哈希表查找与双向链表的已知节点摘除、插入都是平均 O(1)，空间为 O(容量)。并发访问时这些复合步骤要加锁或使用等价的同步方案；Java 的 LinkedHashMap 可用 accessOrder 与 removeEldestEntry 简化单线程实现，但它本身不提供并发安全。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "LRU缓存怎么设计"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "track": "backend",
+      "module": "计算机基础",
+      "topic": "数据结构与算法",
+      "questions": [
+        {
+          "id": "longest-substring-without-repeat",
+          "question": "如何求无重复字符的最长子串长度？",
+          "answer": [
+            "使用滑动窗口和字符上次出现位置表。遍历右端点 r；若当前字符此前出现的位置不小于窗口左端点 l，就把 l 移到该位置的下一位；然后记录当前字符位置，并用 r - l + 1 更新最大长度。",
+            "左右端点都只向前移动，时间复杂度 O(n)，额外空间 O(min(n, 字符集大小))。例如 abcabcbb 的答案是 3，对应最长的 abc 等子串。"
+          ],
+          "sources": [
+            {
+              "company": "招银网络",
+              "original": "hot100： 3. 无重复字符的最长子串"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
